@@ -1,0 +1,7 @@
+Tool Selection:
+
+We choose to use Ruby. It is a very expressive language that will make the code
+for our compiler clearer to read.
+
+You can find the code for the sample lexer in lib/simple_lexer.rb
+Run the lexer by running `ruby bin/simple_lexer.rb <filename>`.
