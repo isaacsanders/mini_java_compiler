@@ -1,0 +1,9 @@
+these are tokens]
+[thisIsAToken // this is an inline comment
+/*
+this is a block comment
+and this is too
+*/()
+ButThisIsATokenAgain.
+NextIsA/Token:
+0;
