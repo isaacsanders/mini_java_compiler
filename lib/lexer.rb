@@ -64,77 +64,11 @@ class Lexer
         # It isn't whitespace, must be a token
         #======================================================================
         case char
-        when 'c'
-          #====================================================================
-          # Tokens starting with 'c' might be "class" or an ID
-          #====================================================================
-          state = :token_c
-        when 'p'
-          #====================================================================
-          # Tokens starting with 'p' might be "public" or an ID
-          #====================================================================
-          state = :token_p
-        when 's'
-          #====================================================================
-          # Tokens starting with 's' might be "static" or an ID
-          #====================================================================
-          state = :token_s
-        when 'e'
-          #====================================================================
-          # Tokens starting with 'e' might be "extends", "else", or an ID
-          #====================================================================
-          state = :token_e
-        when 'v'
-          #====================================================================
-          # Tokens starting with 'v' might be "void" or an ID
-          #====================================================================
-          state = :token_v
-        when 'i'
-          #====================================================================
-          # Tokens starting with 'i' might be "int", "if", or an ID
-          #====================================================================
-          state = :token_i
-        when 'b'
-          #====================================================================
-          # Tokens starting with 'b' might be "boolean" or an ID
-          #====================================================================
-          state = :token_b
-        when 'w'
-          #====================================================================
-          # Tokens starting with 'w' might be "while" or an ID
-          #====================================================================
-          state = :token_w
-        when 'r'
-          #====================================================================
-          # Tokens starting with 'r' might be "return" or an ID
-          #====================================================================
-          state = :token_r
-        when 'n'
-          #====================================================================
-          # Tokens starting with 'n' might be "null", "new", or an ID
-          #====================================================================
-          state = :token_n
-        when 't'
-          #====================================================================
-          # Tokens starting with 't' might be "true", "this", or an ID
-          #====================================================================
-          state = :token_t
-        when 'f'
-          #====================================================================
-          # Tokens starting with 'n' might be "false" or an ID
-          #====================================================================
-          state = :token_f
-        when 'S'
-          #====================================================================
-          # Tokens starting with 'n' might be "String", "System.out.println",
-          # or an ID
-          #====================================================================
-          state = :token_S
-        when 'm'
-          #====================================================================
-          # Tokens starting with 'm' might be "main" or an ID
-          #====================================================================
-          state = :token_m
+        when /[a-zA-Z]/
+          state = :identifier_or_reserved
+          reserved_tree = self.get_reserved_tree(char)
+          input = char
+          char = nil
         when '0'
           #====================================================================
           # This is a 0
@@ -201,232 +135,34 @@ class Lexer
           state = :start
         end
         char = nil
-        #======================================================================
-        # "class" states
-        #======================================================================
-      when :token_c
+      when :identifier_or_reserved
+        nextregex = reserved_tree.nextregex
         case char
-        when 'l' then state = :token_cl
-        else state = :id
-        end
-        char = nil
-      when :token_cl
-        case char
-        when 'a' then state = :token_cla
-        else state = :id
-        end
-        char = nil
-      when :token_cla
-        case char
-        when 's' then state = :token_clas
-        else state = :id
-        end
-        char = nil
-      when :token_clas
-        case char
-        when 's' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "public" states
-        #======================================================================
-      when :token_p
-        case char
-        when 'u' then state = :token_pu
-        else state = :id
-        end
-        char = nil
-      when :token_pu
-        case char
-        when 'b' then state = :token_pub
-        else state = :id
-        end
-        char = nil
-      when :token_pub
-        case char
-        when 'l' then state = :token_publ
-        else state = :id
-        end
-        char = nil
-      when :token_publ
-        case char
-        when 'i' then state = :token_publi
-        else state = :id
-        end
-        char = nil
-      when :token_publi
-        case char
-        when 'c' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "static" states
-        #======================================================================
-      when :token_s
-        case char
-        when 't' then state = :token_st
-        else state = :id
-        end
-        char = nil
-      when :token_st
-        case char
-        when 'a' then state = :token_sta
-        else state = :id
-        end
-        char = nil
-      when :token_sta
-        case char
-        when 't' then state = :token_stat
-        else state = :id
-        end
-        char = nil
-      when :token_stat
-        case char
-        when 'i' then state = :token_stati
-        else state = :id
-        end
-        char = nil
-      when :token_stati
-        case char
-        when 'c' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "extends" states
-        #======================================================================
-      when :token_e
-        case char
-        when 'x' then state = :token_ex
-        else state = :id
-        end
-        char = nil
-      when :token_ex
-        case char
-        when 't' then state = :token_ext
-        else state = :id
-        end
-        char = nil
-      when :token_ext
-        case char
-        when 'e' then state = :token_exte
-        else state = :id
-        end
-        char = nil
-      when :token_exte
-        case char
-        when 'n' then state = :token_exten
-        else state = :id
-        end
-        char = nil
-      when :token_exten
-        case char
-        when 'd' then state = :token_extend
-        else state = :id
-        end
-        char = nil
-      when :token_extend
-        case char
-        when 's' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "void" states
-        #======================================================================
-      when :token_v
-        case char
-        when 'o' then state = :token_vo
-        else state = :id
-        end
-        char = nil
-      when :token_vo
-        case char
-        when 'i' then state = :token_voi
-        else state = :id
-        end
-        char = nil
-      when :token_voi
-        case char
-        when 'd' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "int" states
-        #======================================================================
-      when :token_i
-        case char
-        when 'n' then state = :token_in
-        else state = :id
-        end
-        char = nil
-      when :token_in
-        case char
-        when 't' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "boolean" states
-        #======================================================================
-      when :token_b
-        case char
-        when 'o' then state = :token_bo
-        else state = :id
-        end
-        char = nil
-      when :token_bo
-        case char
-        when 'o' then state = :token_boo
-        else state = :id
-        end
-        char = nil
-      when :token_boo
-        case char
-        when 'l' then state = :token_bool
-        else state = :id
-        end
-        char = nil
-      when :token_bool
-        case char
-        when 'e' then state = :token_boole
-        else state = :id
-        end
-        char = nil
-        #======================================================================
-        # "this" states
-        #======================================================================
-      when :token_t
-        case char
-        when 'r' then state = :token_tr
-        when 'h' then state = :token_th
-        else state = :id
-        end
-        char = nil
-      when :token_th
-        case char
-        when 'i' then state = :token_thi
-        else state = :id
-        end
-        char = nil
-      when :token_thi
-        case char
-        when 's' then state = :reserved_word
-        else state = :id
-        end
-        char = nil
+        when nextregex
+          # on track to a reserved word
+          reserved_tree = reserved_tree.next(char)
+          input << char
+          char = nil
+          # stay in this state unless at the end of word
+          if reserved_tree.at_word
+            state = :reserved_word
+        when /[a-zA-Z0-9/
+          # not a reserved word
+          # some other identifier
+          state = :id
+        else
+          # not a reserved word
+          # identifier is complete
+          state = :id
       when :reserved_word
         case char
-        when "\t", " ", "\n", "\r"
+        when /[a-zA-Z0-9]/
+          # identifier (or other reserved word) prefixed with reserved word
+          state = :identifier_or_reserved
+        else
           tokens << ReservedWord.new(input)
           input = ''
           state = :start
-        else
-          state = :id
-        end
       when :id
         #======================================================================
         # ID token
