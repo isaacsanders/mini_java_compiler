@@ -33,7 +33,7 @@ class Lexer
 
 
       case state
-      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator
+      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator, :equals
       else
         input << char
       end
@@ -105,6 +105,7 @@ class Lexer
           # This may be a "=" or a "=="
           #====================================================================
           state = :equals
+          char = ''
         when '&'
           #====================================================================
           # This needs to be followed by another &, or there is an error
@@ -184,10 +185,12 @@ class Lexer
       when :equals
         case char
         when '='
-          tokens << Operator.new(input)
+          input << char
+          tokens << Operator.new(input) # '=='
           char = nil
         else
           tokens << Delimiter.new('=')
+          # don't clear char
         end
         input = ''
         state = :start
