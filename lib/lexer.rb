@@ -173,6 +173,19 @@ class Lexer
           state = :start
           # keep non-& char for next token
         end
+      when :pipe
+        case char
+        when '|'
+          tokens << Operator.new(input)
+          char = nil
+          input = ''
+          state = :start
+        else
+          errors << [lineno, column, "Invalid syntax '|'"]
+          input = '' # throw out our existing '|'
+          state = :start
+          # keep non-| char for next token
+        end
         #======================================================================
         # "<", "<=", ">", ">=", "=", "==", "!", "!=" states
         #======================================================================
