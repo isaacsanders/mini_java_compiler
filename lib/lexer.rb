@@ -87,7 +87,7 @@ class Lexer
           # This is the beginning of a non-zero integer
           #====================================================================
           state = :nonzero_integer
-          char = ''
+          char = nil
         when '+', '-', '*'
           #====================================================================
           # This is an operator
@@ -102,13 +102,13 @@ class Lexer
           #               "!"      "!="
           #====================================================================
           state = :one_or_two_char_operator
-          char = ''
+          char = nil
         when '='
           #====================================================================
           # This may be a "=" or a "=="
           #====================================================================
           state = :equals
-          char = ''
+          char = nil
         when '&', '|'
           #====================================================================
           # This needs to be followed by itself, or there is an error
