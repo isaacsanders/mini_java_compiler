@@ -87,7 +87,7 @@ Delimiter, ;
 Delimiter, )
 Delimiter, (
 Delimiter, (
-Delimiter, /
+Operator, /
 Delimiter, (
 Delimiter, (
 Delimiter, (
