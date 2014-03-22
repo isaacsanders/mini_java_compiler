@@ -181,26 +181,6 @@ class Lexer
         tokens << Operator.new(input)
         input = ''
         state = :start
-      when :greater_than
-        case char
-        when '='
-          tokens << Operator.new(input)
-          char = nil
-        else
-          tokens << Operator.new('>')
-        end
-        input = ''
-        state = :start
-      when :shebang
-        case char
-        when '='
-          tokens << Operator.new(input)
-          char = nil
-        else
-          tokens << Operator.new('!')
-        end
-        input = ''
-        state = :start
       when :equals
         case char
         when '='
