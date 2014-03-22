@@ -9,7 +9,7 @@ class Lexer
 
   def initialize(file)
     @file = file
-    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main','System.out.println'])
+    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main'])
   end
 
   def set_reserved_words(list_of_words)
@@ -40,7 +40,7 @@ class Lexer
       case state
       when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator, :equals, :nonzero_integer
       else
-        input << char
+        input << char unless char == :eof
       end
 
       case state
@@ -82,6 +82,8 @@ class Lexer
         # It isn't whitespace, must be a token
         #======================================================================
         case char
+        when 'S'
+          state = :token_S
         when '0'
           #====================================================================
           # This is a 0
@@ -168,14 +170,14 @@ class Lexer
           state = :id
         end
       when :ampersand_or_pipe
-        case char
-        when input[0] # existing pipe or ampersand
+        case input
+        when '&&', '||' # existing pipe or ampersand
           tokens << Operator.new(input)
           char = nil
           input = ''
           state = :start
         else
-          errors << [lineno, column, "Invalid syntax '" + input[0] + "'"]
+          errors << [lineno, column, "Invalid syntax '#{input}'"]
           input = '' # throw out our existing '&' or '|'
           state = :start
           # keep non-& or non-| char for next token
@@ -207,163 +209,308 @@ class Lexer
         end
         input = ''
         state = :start
+      when :token_S
+        case char
+        when 'y'
+          state = :token_Sy
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          state = :id
+          char = nil
+        else
+          tokens << ID.new('S')
+          input = ''
+          state = :start
+        end
       when :token_Sy
         case char
-        when 's' then state = :token_Sys
-        else state = :id
+        when 's'
+          state = :token_Sys
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          state = :id
+          char = nil
+        else
+          tokens << ID.new('Sy')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_Sys
         case char
-        when 't' then state = :token_Syst
-        else state = :id
+        when 't'
+          state = :token_Syst
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          state = :id
+          char = nil
+        else
+          tokens << ID.new('Sys')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_Syst
         case char
-        when 'e' then state = :token_Syste
-        else state = :id
+        when 'e'then state = :token_Syste
+          state = :token_Syste
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          state = :id
+          char = nil
+        else
+          tokens << ID.new('Syst')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_Syste
         case char
         when 'm' then state = :token_System
-        else state = :id
+          state = :token_System
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          state = :id
+          char = nil
+        else
+          tokens << ID.new('Syste')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System
         case char
-        when '.' then state = :token_System_dot
+        when '.'
+          state = :token_System_dot
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          state = :id
+          char = nil
         else
           tokens << ID.new("System")
-          input = char
-          state = :id
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot
         case char
-        when 'o' then state = :token_System_dot_o
-        else
+        when 'o'
+          state = :token_System_dot_o
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           input = char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_o
         case char
-        when 'u' then state = :token_System_dot_ou
-        else
+        when 'u'
+          state = :token_System_dot_ou
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           input = 'o' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('o')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_ou
         case char
-        when 't' then state = :token_System_dot_out
-        else
+        when 't'
+          state = :token_System_dot_out
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           input = 'ou' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('ou')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out
         case char
-        when '.' then state = :token_System_dot_out_dot
-        else
+        when '.'
+          state = :token_System_dot_out_dot
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           input = 'out' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot
         case char
-        when 'p' then state = :token_System_dot_out_dot_p
-        else
+        when 'p'
+          state = :token_System_dot_out_dot_p
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_p
         case char
-        when 'r' then state = :token_System_dot_out_dot_pr
-        else
+        when 'r'
+          state = :token_System_dot_out_dot_pr
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = 'p' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          tokens << ID.new('p')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_pr
         case char
-        when 'i' then state = :token_System_dot_out_dot_pri
-        else
+        when 'i'
+          state = :token_System_dot_out_dot_pri
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = 'pr' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          tokens << ID.new('pr')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_pri
         case char
-        when 'n' then state = :token_System_dot_out_dot_prin
-        else
+        when 'n'
+          state = :token_System_dot_out_dot_prin
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = 'pri' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          tokens << ID.new('pri')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_prin
         case char
-        when 't' then state = :token_System_dot_out_dot_print
-        else
+        when 't'
+          state = :token_System_dot_out_dot_print
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = 'prin' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          tokens << ID.new('prin')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_print
         case char
-        when 'l' then state = :token_System_dot_out_dot_printl
-        else
+        when 'l'
+          state = :token_System_dot_out_dot_printl
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = 'print' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          tokens << ID.new('print')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_printl
         case char
-        when 'n' then state = :token_System_dot_out_dot_println
-        else
+        when 'n'
+          state = :token_System_dot_out_dot_println
+          char = nil
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
           tokens << ID.new("out")
           tokens << Delimiter.new('.')
           input = 'printl' + char
           state = :id
+          char = nil
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new('out')
+          tokens << Delimiter.new('.')
+          tokens << ID.new('printl')
+          input = ''
+          state = :start
         end
-        char = nil
       when :token_System_dot_out_dot_println
         case char
         when 'a'..'z', 'A'..'Z', '0'..'9'
