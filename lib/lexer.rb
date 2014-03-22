@@ -87,6 +87,7 @@ class Lexer
           # This is the beginning of a non-zero integer
           #====================================================================
           state = :nonzero_integer
+          char = ''
         when '+', '-', '*'
           #====================================================================
           # This is an operator
@@ -138,12 +139,13 @@ class Lexer
         case char
         when '0'..'9'
           input << char
+          char = ''
         else
           tokens << Integer.new(input)
           input = ''
           state = :start
+          # we haven't used the char
         end
-        char = ''
       when :identifier_or_reserved
         reserved_tree = reserved_tree.next(char)
         if reserved_tree
