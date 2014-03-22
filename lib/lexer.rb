@@ -392,21 +392,23 @@ class Lexer
           char = file.readchar until char =~ /[\n\r]/
           lineno += 1
           state = :start
+          char = nil
         when "*"
           #====================================================================
           # This is the opening of a block comment
           #====================================================================
           input = ""
           state = :block_comment
+          char = nil
         else
           #====================================================================
           # We found a / operator. Back to normal business.
           #====================================================================
           tokens << Operator.new('/')
-          input = char
+          input = ''
           state = :start
+          # char is still unused; keep for later
         end
-        char = nil
       when :block_comment
         #======================================================================
         # Inside a block comment
