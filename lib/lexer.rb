@@ -165,12 +165,13 @@ class Lexer
         when '&'
           tokens << Operator.new(input)
           char = nil
+          input = ''
           state = :start
         else
           errors << [lineno, column, "Invalid syntax '&'"]
-          input = ''
-          char = nil
+          input = '' # throw out our existing '&'
           state = :start
+          # keep non-& char for next token
         end
         #======================================================================
         # "<", "<=", ">", ">=", "=", "==", "!", "!=" states
