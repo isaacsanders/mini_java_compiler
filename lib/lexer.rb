@@ -160,6 +160,18 @@ class Lexer
           # not a reserved word
           state = :id
         end
+      when :ampersand
+        case char
+        when '&'
+          tokens << Operator.new(input)
+          char = nil
+          state = :start
+        else
+          errors << [lineno, column, "Invalid syntax '&'"]
+          input = ''
+          char = nil
+          state = :start
+        end
         #======================================================================
         # "<", "<=", ">", ">=", "=", "==", "!", "!=" states
         #======================================================================
@@ -432,6 +444,8 @@ class Lexer
       else
         raise [state.to_s, input, char].to_s
       end
+    rescue EOFError
+      [[],[]]
     end until @file.eof?
     @file.close
     [tokens, errors]
