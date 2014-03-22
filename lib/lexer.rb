@@ -109,16 +109,11 @@ class Lexer
           #====================================================================
           state = :equals
           char = ''
-        when '&'
+        when '&', '|'
           #====================================================================
-          # This needs to be followed by another &, or there is an error
+          # This needs to be followed by itself, or there is an error
           #====================================================================
-          state = :ampersand
-        when '|'
-          #====================================================================
-          # This needs to be followed by another |, or there is an error
-          #====================================================================
-          state = :pipe
+          state = :ampersand_or_pipe
         when ';', '.', ',', '(', ')', '{', '}', '[', ']'
           #====================================================================
           # We have a delimiter
@@ -160,31 +155,18 @@ class Lexer
           # not a reserved word
           state = :id
         end
-      when :ampersand
+      when :ampersand_or_pipe
         case char
-        when '&'
+        when input[0] # existing pipe or ampersand
           tokens << Operator.new(input)
           char = nil
           input = ''
           state = :start
         else
-          errors << [lineno, column, "Invalid syntax '&'"]
-          input = '' # throw out our existing '&'
+          errors << [lineno, column, "Invalid syntax '" + input[0] + "'"]
+          input = '' # throw out our existing '&' or '|'
           state = :start
-          # keep non-& char for next token
-        end
-      when :pipe
-        case char
-        when '|'
-          tokens << Operator.new(input)
-          char = nil
-          input = ''
-          state = :start
-        else
-          errors << [lineno, column, "Invalid syntax '|'"]
-          input = '' # throw out our existing '|'
-          state = :start
-          # keep non-| char for next token
+          # keep non-& or non-| char for next token
         end
         #======================================================================
         # "<", "<=", ">", ">=", "=", "==", "!", "!=" states
