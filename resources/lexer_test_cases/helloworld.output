@@ -1,5 +1,6 @@
 ReservedWord, class
 ID, Hello
+Delimiter, {
 ReservedWord, public
 ReservedWord, static
 ReservedWord, void
