@@ -32,12 +32,11 @@ class Lexer
       end
 
       case state
-      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word
+      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :less_than
       else
         input << char
       end
 
-      printf %{%s "%s" '%s'\n}, state, input, char
       case state
       when :start
         #======================================================================
@@ -55,7 +54,7 @@ class Lexer
           char = nil
         when "/"
           #====================================================================
-          # Could be a comment or a delimiter
+          # Could be a comment or an operator
           #====================================================================
           char = nil
           state = :forward_slash
@@ -151,6 +150,206 @@ class Lexer
           # not a reserved word
           state = :id
         end
+        #======================================================================
+        # "<", "<=", ">", ">=", "=", "==", "!", "!=" states
+        #======================================================================
+      when :less_than
+        case char
+        when '='
+          tokens << Operator.new(input)
+          char = nil
+        else
+          tokens << Operator.new('<')
+        end
+        input = ''
+        state = :start
+      when :greater_than
+        case char
+        when '='
+          tokens << Operator.new(input)
+          char = nil
+        else
+          tokens << Operator.new('>')
+        end
+        input = ''
+        state = :start
+      when :shebang
+        case char
+        when '='
+          tokens << Operator.new(input)
+          char = nil
+        else
+          tokens << Operator.new('!')
+        end
+        input = ''
+        state = :start
+      when :equals
+        case char
+        when '='
+          tokens << Operator.new(input)
+          char = nil
+        else
+          tokens << Delimiter.new('=')
+        end
+        input = ''
+        state = :start
+      when :token_Sy
+        case char
+        when 's' then state = :token_Sys
+        else state = :id
+        end
+        char = nil
+      when :token_Sys
+        case char
+        when 't' then state = :token_Syst
+        else state = :id
+        end
+        char = nil
+      when :token_Syst
+        case char
+        when 'e' then state = :token_Syste
+        else state = :id
+        end
+        char = nil
+      when :token_Syste
+        case char
+        when 'm' then state = :token_System
+        else state = :id
+        end
+        char = nil
+      when :token_System
+        case char
+        when '.' then state = :token_System_dot
+        else
+          tokens << ID.new("System")
+          input = char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot
+        case char
+        when 'o' then state = :token_System_dot_o
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          input = char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_o
+        case char
+        when 'u' then state = :token_System_dot_ou
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          input = 'o' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_ou
+        case char
+        when 't' then state = :token_System_dot_out
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          input = 'ou' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out
+        case char
+        when '.' then state = :token_System_dot_out_dot
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          input = 'out' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot
+        case char
+        when 'p' then state = :token_System_dot_out_dot_p
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot_p
+        case char
+        when 'r' then state = :token_System_dot_out_dot_pr
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'p' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot_pr
+        case char
+        when 'i' then state = :token_System_dot_out_dot_pri
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'pr' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot_pri
+        case char
+        when 'n' then state = :token_System_dot_out_dot_prin
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'pri' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot_prin
+        case char
+        when 't' then state = :token_System_dot_out_dot_print
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'prin' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot_print
+        case char
+        when 'l' then state = :token_System_dot_out_dot_printl
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'print' + char
+          state = :id
+        end
+        char = nil
+      when :token_System_dot_out_dot_printl
+        case char
+        when 'n' then state = :reserved_word
+        else
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'printl' + char
+          state = :id
+        end
+        char = nil
       when :reserved_word
         case char
         when /[a-zA-Z0-9]/
@@ -195,9 +394,9 @@ class Lexer
           state = :block_comment
         else
           #====================================================================
-          # We found a / delimiter. Back to normal business.
+          # We found a / operator. Back to normal business.
           #====================================================================
-          tokens << Delimiter.new('/')
+          tokens << Operator.new('/')
           input = char
           state = :start
         end
@@ -225,6 +424,13 @@ class Lexer
       end
     end
     [tokens, errors]
+  end
+
+  def print
+    tokens, errors = get_tokens
+    tokens.each do |token|
+      printf "%s, %s\n", token.class.name.split("::")[-1], token.input_text
+    end
   end
 end
 
