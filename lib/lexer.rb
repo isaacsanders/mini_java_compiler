@@ -9,7 +9,7 @@ class Lexer
 
   def initialize(file)
     @file = file
-    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main','System.out.println'])
+    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main'])
   end
 
   def set_reserved_words(list_of_words)
@@ -158,6 +158,11 @@ class Lexer
           if reserved_tree.is_accepting
             state = :reserved_word
           end
+        elsif input == "S" and char == "y"
+          # hook for System.out.println workaround
+          state = :token_Sy
+          input << char
+          char = nil
         else
           # not a reserved word
           state = :id
@@ -349,7 +354,7 @@ class Lexer
         char = nil
       when :token_System_dot_out_dot_printl
         case char
-        when 'n' then state = :reserved_word
+        when 'n' then state = :token_System_dot_out_dot_println
         else
           tokens << ID.new("System")
           tokens << Delimiter.new('.')
@@ -359,6 +364,20 @@ class Lexer
           state = :id
         end
         char = nil
+      when :token_System_dot_out_dot_println
+        case char
+        when 'a'..'z', 'A'..'Z', '0'..'9'
+          tokens << ID.new("System")
+          tokens << Delimiter.new('.')
+          tokens << ID.new("out")
+          tokens << Delimiter.new('.')
+          input = 'println'
+          state = :id
+        else
+          tokens << ReservedWord.new('System.out.println')
+          input = ''
+          state = :start
+        end
       when :reserved_word
         case char
         when /^[a-zA-Z0-9]$/
