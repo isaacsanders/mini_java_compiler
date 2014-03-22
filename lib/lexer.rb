@@ -371,7 +371,7 @@ class Lexer
         # ID token
         #======================================================================
         case char
-        when 'a'..'z', 'A'..'Z', '0..9'
+        when 'a'..'z', 'A'..'Z', '0'..'9'
           input << char
           char = nil
         else
