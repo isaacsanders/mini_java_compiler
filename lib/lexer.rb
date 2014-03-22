@@ -361,7 +361,7 @@ class Lexer
         char = nil
       when :reserved_word
         case char
-        when /[a-zA-Z0-9]/
+        when /^[a-zA-Z0-9]$/
           # identifier (or other reserved word) prefixed with reserved word
           state = :identifier_or_reserved
         else
