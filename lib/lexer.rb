@@ -33,7 +33,7 @@ class Lexer
 
 
       case state
-      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator, :equals
+      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator, :equals, :nonzero_integer
       else
         input << char
       end
@@ -48,11 +48,13 @@ class Lexer
           lineno += 1
           column = 0
           char = nil
+          input = '' # it should already be blank (otherwise there's a bug)
         when "\t", " "
           #====================================================================
           # Whitespace, nothing special
           #====================================================================
           char = nil
+          input = '' # it should already be blank (otherwise there's a bug)
         when "/"
           #====================================================================
           # Could be a comment or an operator
@@ -135,12 +137,13 @@ class Lexer
       when :nonzero_integer
         case char
         when '0'..'9'
-          char = nil
+          input << char
         else
-          tokens << Integer.new(input[0..-2])
-          input = input[-1]
+          tokens << Integer.new(input)
+          input = ''
           state = :start
         end
+        char = ''
       when :identifier_or_reserved
         reserved_tree = reserved_tree.next(char)
         if reserved_tree
