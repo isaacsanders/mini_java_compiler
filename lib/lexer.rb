@@ -25,11 +25,12 @@ class Lexer
     column = 0
     char = nil
     reserved_tree = nil
-    until file.eof?
+    begin
       if char.nil?
         char = file.readchar
         column += 1
       end
+
 
       case state
       when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :less_than
@@ -136,6 +137,15 @@ class Lexer
           state = :start
         end
         char = nil
+      when :nonzero_integer
+        case char
+        when '0'..'9'
+          char = nil
+        else
+          tokens << Integer.new(input[0..-2])
+          input = input[-1]
+          state = :start
+        end
       when :identifier_or_reserved
         reserved_tree = reserved_tree.next(char)
         if reserved_tree
@@ -422,7 +432,8 @@ class Lexer
       else
         raise [state.to_s, input, char].to_s
       end
-    end
+    end until @file.eof?
+    @file.close
     [tokens, errors]
   end
 
