@@ -9,6 +9,11 @@ class Lexer
 
   def initialize(file)
     @file = file
+    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main','System.out.println'])
+  end
+
+  def set_reserved_words(list_of_words)
+    @reserved_tree = ReservedTree.new(list_of_words)
   end
 
   def get_tokens
@@ -19,6 +24,7 @@ class Lexer
     lineno = 1
     column = 0
     char = nil
+    reserved_tree = nil
     until file.eof?
       if char.nil?
         char = file.readchar
@@ -26,7 +32,7 @@ class Lexer
       end
 
       case state
-      when :start, :id, :forward_slash, :block_comment, :reserved_word
+      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word
       else
         input << char
       end
@@ -53,6 +59,9 @@ class Lexer
           #====================================================================
           char = nil
           state = :forward_slash
+        when 'a'..'z', 'A'..'Z'
+          state = :identifier_or_reserved
+          reserved_tree = @reserved_tree # instance var resets tree
         else
           #====================================================================
           # token stage
@@ -64,11 +73,6 @@ class Lexer
         # It isn't whitespace, must be a token
         #======================================================================
         case char
-        when /[a-zA-Z]/
-          state = :identifier_or_reserved
-          reserved_tree = self.get_reserved_tree(char)
-          input = char
-          char = nil
         when '0'
           #====================================================================
           # This is a 0
@@ -124,8 +128,6 @@ class Lexer
           input = ''
           tokens << Delimiter.new(char)
           state = :start
-        when 'a'..'z', 'A'..'Z'
-          state = :id
         else
           #====================================================================
           # We might have an ID, or an invalid symbol
@@ -136,24 +138,19 @@ class Lexer
         end
         char = nil
       when :identifier_or_reserved
-        nextregex = reserved_tree.nextregex
-        case char
-        when nextregex
+        reserved_tree = reserved_tree.next(char)
+        if reserved_tree
           # on track to a reserved word
-          reserved_tree = reserved_tree.next(char)
           input << char
           char = nil
           # stay in this state unless at the end of word
-          if reserved_tree.at_word
+          if reserved_tree.is_accepting
             state = :reserved_word
-        when /[a-zA-Z0-9/
-          # not a reserved word
-          # some other identifier
-          state = :id
+          end
         else
           # not a reserved word
-          # identifier is complete
           state = :id
+        end
       when :reserved_word
         case char
         when /[a-zA-Z0-9]/
@@ -163,6 +160,7 @@ class Lexer
           tokens << ReservedWord.new(input)
           input = ''
           state = :start
+        end
       when :id
         #======================================================================
         # ID token
@@ -228,4 +226,39 @@ class Lexer
     end
     [tokens, errors]
   end
+end
+
+class ReservedTree
+  attr_reader :is_accepting
+
+  # recursively initializes a tree of words where
+  # each ReservedTree is a node
+  def initialize(reserved_words)
+    @is_accepting = false
+    @children = Hash.new()
+    mapping = Hash.new([])
+    reserved_words.each do |word|
+      firstchar = word[0]
+      if firstchar
+        mapping[firstchar] += [word[1..-1]]
+      else
+        # word is empty string
+        @is_accepting = true
+      end
+    end
+    mapping.each do |firstchar, words|
+      # words is a list of words that begin with the
+      # firstchar, but with that char removed
+      @children[firstchar] = ReservedTree.new(words)
+    end
+  end
+
+  def next(char)
+    return @children[char]
+  end
+
+  def has_next?(char)
+    return @children.has_key? char
+  end
+
 end
