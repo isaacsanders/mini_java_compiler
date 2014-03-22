@@ -414,13 +414,23 @@ class Lexer
           #====================================================================
           # Could be the end of a block comment
           #====================================================================
-          char = file.readchar
-          if char == "/"
-            input = ""
-            state = :start
-          end
+          input = ""
+          state = :block_comment_star
         when "\n", "\r"
           lineno += 1
+        end
+        char = nil
+      when :block_comment_star
+        input = ''
+        case char
+        when "/"
+          # done with comment!
+          state = :start
+        when "*"
+          # stay in this state
+        else
+          # back to regular block comment
+          state = :block_comment
         end
         char = nil
       else
