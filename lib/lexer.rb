@@ -25,10 +25,15 @@ class Lexer
     column = 0
     char = nil
     reserved_tree = nil
+    is_done = false
     begin
       if char.nil?
-        char = file.readchar
-        column += 1
+        begin
+          char = file.readchar
+          column += 1
+        rescue EOFError
+          char = :eof
+        end
       end
 
 
@@ -44,6 +49,8 @@ class Lexer
         # Start State
         #======================================================================
         case char
+        when :eof
+          is_done = true
         when "\n", "\r"
           lineno += 1
           column = 0
@@ -385,7 +392,7 @@ class Lexer
           # This is an inline comment
           #====================================================================
           input = ""
-          char = file.readchar until char =~ /[\n\r]/
+          char = file.readchar until char =~ /[\n\r]/ or file.eof?
           lineno += 1
           state = :start
           char = nil
@@ -436,9 +443,7 @@ class Lexer
       else
         raise [state.to_s, input, char].to_s
       end
-    rescue EOFError
-      [[],[]]
-    end until @file.eof?
+    end until is_done
     @file.close
     [tokens, errors]
   end
