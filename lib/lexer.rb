@@ -134,7 +134,7 @@ class Lexer
         case char
         when '0'..'9'
           input << char
-          char = ''
+          char = nil
         else
           tokens << Integer.new(input)
           input = ''
