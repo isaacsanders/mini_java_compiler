@@ -33,7 +33,7 @@ class Lexer
 
 
       case state
-      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :less_than
+      when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator
       else
         input << char
       end
@@ -90,27 +90,21 @@ class Lexer
           # This is an operator
           #====================================================================
           tokens << Operator.new(char)
+          input = ''
           state = :start
-        when '<'
+        when '<','>','!'
           #====================================================================
           # This may be a "<" or a "<="
+          #               ">"      ">="
+          #               "!"      "!="
           #====================================================================
-          state = :less_than
-        when '>'
-          #====================================================================
-          # This may be a ">" or a ">="
-          #====================================================================
-          state = :greater_than
+          state = :one_or_two_char_operator
+          char = ''
         when '='
           #====================================================================
           # This may be a "=" or a "=="
           #====================================================================
           state = :equals
-        when '!'
-          #====================================================================
-          # This may be a "!" or a "!="
-          #====================================================================
-          state = :shebang
         when '&'
           #====================================================================
           # This needs to be followed by another &, or there is an error
@@ -175,14 +169,16 @@ class Lexer
         #======================================================================
         # "<", "<=", ">", ">=", "=", "==", "!", "!=" states
         #======================================================================
-      when :less_than
+      when :one_or_two_char_operator
         case char
         when '='
-          tokens << Operator.new(input)
+          # add = to the operator
+          input << char
           char = nil
         else
-          tokens << Operator.new('<')
+          # do not consume current char
         end
+        tokens << Operator.new(input)
         input = ''
         state = :start
       when :greater_than
