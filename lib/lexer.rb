@@ -5,7 +5,7 @@ class Lexer
   ReservedWord = Class.new(token)
   Operator = Class.new(token)
   Delimiter = Class.new(token)
-  attr_reader :file
+  attr_reader :file, :errors, :tokens
 
   def initialize(file)
     @file = file
@@ -16,7 +16,7 @@ class Lexer
     @reserved_tree = ReservedTree.new(list_of_words)
   end
 
-  def get_tokens
+  def run
     state = :start
     input = ""
     tokens = []
@@ -611,11 +611,13 @@ class Lexer
       end
     end until is_done
     @file.close
-    [tokens, errors]
+    @errors = errors
+    @tokens = tokens
+    self
   end
 
   def print
-    tokens, errors = get_tokens
+    run
     tokens.each do |token|
       printf "%s, %s\n", token.class.name.split("::")[-1], token.input_text
     end
