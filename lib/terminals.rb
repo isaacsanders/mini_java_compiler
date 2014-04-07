@@ -27,7 +27,7 @@ module Terminals
   }.zip(%w{
     add sub mult div
     lt lte gte gt
-    eq neq and or not
+    eq neq and or bang
   }).each do |(sym, name)|
     define_method("#{name}_o") do
       Lexer::Operator.new(sym)

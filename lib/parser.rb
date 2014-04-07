@@ -19,7 +19,7 @@ class Parser
     loop do
       if focus == :eof and word == :eof
         return [ast, errors]
-      elsif TERMINALS.include?(focus) or focus == :eof
+      elsif Grammar::TERMINALS.include?(focus) or focus == :eof
         if focus == word
           stack.pop
           word = tokens.shift
@@ -27,7 +27,7 @@ class Parser
           errors << LookingForFocusError.new(focus)
         end
       else
-        table_entry = PARSE_TABLE[focus]
+        table_entry = Grammar::PARSE_TABLE[focus]
         if table_entry.is_a? Array
           stack.pop
           table_entry.each do |token|
