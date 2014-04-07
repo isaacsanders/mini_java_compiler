@@ -1,10 +1,10 @@
 class Lexer
-  token = Struct.new(:input_text)
-  ID = Class.new(token)
-  Integer = Class.new(token)
-  ReservedWord = Class.new(token)
-  Operator = Class.new(token)
-  Delimiter = Class.new(token)
+  Token = Struct.new(:input_text)
+  ID = Class.new(Token)
+  Integer = Class.new(Token)
+  ReservedWord = Class.new(Token)
+  Operator = Class.new(Token)
+  Delimiter = Class.new(Token)
   attr_reader :file, :errors, :tokens
 
   def initialize(file)
