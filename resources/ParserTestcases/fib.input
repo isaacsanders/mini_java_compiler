@@ -1,5 +1,5 @@
 public class MainClass {
-  public static int main (String[] args) {
+  public static void main (String[] args) {
     Fibber fibber = new Fibber();
     System.out.println(fibber.fib(5));
     System.out.println(fibber.fib(4));
@@ -11,9 +11,12 @@ public class MainClass {
 
 public class Fibber {
   public int fib(int n) {
+    int result = 0;
     if (n <= 1) {
-      return 1;
+      result = 1;
+    } else {
+      result = this.fib(n - 1) + this.fib(n - 2);
     }
-    return fib(n - 1) + fib(n - 2);
+    return result;
   }
 }
