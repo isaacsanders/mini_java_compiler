@@ -1,4 +1,4 @@
-public class MainClass {
+class MainClass {
   public static void main(String[] args) {
     Facter facter = new Facter();
     System.out.println(facter.fact(5));
@@ -9,7 +9,7 @@ public class MainClass {
   }
 }
 
-public class Facter {
+class Facter {
   public int fact(int n) {
     int result = 0;
     if (n <= 0) {
@@ -21,7 +21,7 @@ public class Facter {
         prod = prod * n;
         n = n - 1;
       }
-      result = prod
+      result = prod;
     }
     return result;
   }

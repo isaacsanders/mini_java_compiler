@@ -1,4 +1,4 @@
-public class MainClass {
+class MainClass {
   public static void main (String[] args) {
     Fibber fibber = new Fibber();
     System.out.println(fibber.fib(5));
@@ -9,7 +9,7 @@ public class MainClass {
   }
 }
 
-public class Fibber {
+class Fibber {
   public int fib(int n) {
     int result = 0;
     if (n <= 1) {

@@ -612,7 +612,7 @@ class Lexer
     end until is_done
     @file.close
     @errors = errors
-    @tokens = tokens
+    @tokens = tokens + [:eof]
     self
   end
 
