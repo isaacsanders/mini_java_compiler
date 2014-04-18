@@ -26,6 +26,17 @@ module Intermediate
       @id, @method_list, @field_list, @opt_extends = id, method_list, field_list, opt_extends
     end
 
+    def init_st(parent)
+      @symbol_table = SymbolTable.new(parent)
+      parent.add_symbol("Class", @id)
+      @field_list.each do |f|
+        f.init_st(@symbol_table)
+      end
+      @method_list.each do |m|
+        m.init_st(@symbol_table)
+      end
+    end
+    
     def check_types(symbol_table, errors)
       if opt_extends
         symbol_table
@@ -36,6 +47,10 @@ module Intermediate
   class Field
     def initialize(type, id)
       @type, @id = type, id
+    end
+
+    def init_st(parent)
+      parent.add_symbol(@type, @id)
     end
   end
 
@@ -59,10 +74,20 @@ module Intermediate
     def initialize(statement_list)
       @statement_list = statement_list
     end
+
+    def init_st(parent)
+      @statement_list.reduce(parent) do |symbol_table, stmt|
+        stmt.init_st(symbol_table)
+        stmt.symbol_table
+      end
+    end
   end
 
   class Statement
-
+    attr_reader :symbol_table
+    def init_st(parent)
+      @symbol_table = parent
+    end
   end
 
   class InitStatement < Statement
@@ -72,12 +97,21 @@ module Intermediate
     # type # type type
     # id
     # expr # 'type' type
+
+    def init_st(parent)
+      @symbol_table = SymbolTable.new(parent)
+      @symbol_table.add_symbol(@type, @id)
+    end
   end
 
   class BlockStatement < Statement
     def initialize(procedure)
       @procedure = procedure
     end
+
+    def init_st(parent)
+      @symbol_table = SymbolTable.new(parent)
+      procedure.init_st(parent)
   end
 
   class IfElseStatement < Statement
@@ -86,6 +120,12 @@ module Intermediate
       @true_statement = true_statement
       @false_statement = false_statement
     end
+
+    def init_st(parent)
+      super
+      @condition_expr.init_st(@symbol_table)
+      @true_statement.init_st(@symbol_table)
+      @false_statement.init_st(@symbol_table)
   end
 
   class WhileStatement < Statement
@@ -93,35 +133,63 @@ module Intermediate
       @condition_expr = condition_expr # bool type
       @statement = statement
     end
+
+    def init_st(parent)
+      super
+      @condition_expr.init_st(@symbol_table)
+      @statement.init_st(@symbol_table)
   end
 
   class PrintlnStatement < Statement
     def initialize(expr)
       @expr = expr # int type
     end
+
+    def init_st(parent)
+      super
+      @expr.init_st(@symbol_table)
+    end
   end
 
   class AssignStatement < Statement
     # id
-    # value_exp # type must match id's
-    def initialize(id, value_exp)
-      @id, @value_exp = id, value_exp
+    # value_expr # type must match id's
+    def initialize(id, value_expr)
+      @id, @value_expr = id, value_expr
+    end
+
+    def init_st(parent)
+      super
+      @value_expr.init_st(@symbol_table)
     end
   end
 
   class Expression
-
+    def init_st(parent)
+      @symbol_table = parent
+    end
   end
 
   class InfixExpr < Expression
     def initialize(lhs, op, rhs)
       @lhs, @op, @rhs = lhs, op, rhs
     end
+
+    def init_st(parent)
+      super
+      @lhs.init_st(@symbol_table)
+      @rhs.init_st(@symbol_table)
+    end
   end
 
   class PrefixExpr < Expression
     def initialize(op, expr)
       @op, @expr = op, expr
+    end
+
+    def init_st(parent)
+      super
+      @expr.init_st(@symbol_table)
     end
   end
 
@@ -132,11 +200,24 @@ module Intermediate
     # expr
     # method_id - must be a member of expr's class
     # arg_list - must fit in method_id's args
+
+    def init_st(parent)
+      super
+      @expr.init_st(@symbol_table)
+      @arg_list.each do |arg|
+        arg.init_st(@symbol_table)
+      end
+    end
   end
 
   class InitExpr < Expression
     def initialize(klass)
       @klass = klass
+    end
+
+    def init_st(parent)
+      super
+      # todo?
     end
   end
 
