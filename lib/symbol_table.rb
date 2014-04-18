@@ -2,8 +2,9 @@ class SymbolTable
   def initialize(parent)
     @parent = parent
     @table = {}
+    @errors = []
   end
-  
+
   def add_symbol(type, id)
     if self.get_symbol(id) # todo: fix cases where shadowing is ok
       return :preexists
@@ -15,6 +16,14 @@ class SymbolTable
 
   def get_symbol(id)
     @table[id] or get_symbol_from_parent(id)
+  end
+
+  def add_error(error)
+    if parent
+      parent.add_error(error)
+    else
+      @errors << error
+    end
   end
 
   def get_symbol_from_parent(id)

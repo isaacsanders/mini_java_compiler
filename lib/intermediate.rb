@@ -1,8 +1,11 @@
 module Intermediate
   class Program
+    attr_reader :symbol_table
+
     def initialize(main_class, class_list)
       @main_class = main_class
       @class_list = class_list
+      init_st
     end
 
     def init_st # symbol table
@@ -47,11 +50,25 @@ module Intermediate
       @procedure,
       @return_statement = id, arg_list, return_type, procedure, return_statement
     end
+
+    def init_st(parent)
+      parent.add_symbol(@return_type, @id)
+      @symbol_table = SymbolTable.new(parent)
+      @arg_list.each do |arg|
+        arg.init_st(@symbol_table)
+      end
+    end
   end
 
   class Formal
     def initialize(type, name)
       @type, @name = type, name
+    end
+
+    def init_st(parent)
+      if parent.add_symbol(@type, @name) == :preexists
+        parent.add_error(DuplicateArgumentError.new(arg.name, arg.type))
+      end
     end
   end
 
