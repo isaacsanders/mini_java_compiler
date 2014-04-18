@@ -5,6 +5,7 @@ require_relative 'grammar'
 
 class Parser
   include Terminals
+  attr_reader :parse_tree, :errors
 
   class ExpandingFocusError
     def initialize(focus, word)
@@ -22,7 +23,7 @@ class Parser
     @tokens = tokens
   end
 
-  def parse
+  def run
     tokens = @tokens.dup
     errors = []
     word = tokens.shift
@@ -33,7 +34,9 @@ class Parser
     focus = stack.last
     loop do
       if focus == :eof and word == :eof
-        return [parse_tree, errors]
+        @parse_tree = parse_tree
+        @errors = errors
+        return self
       elsif terminal?(focus) or focus == :eof
         is_id = focus.is_a?(Lexer::ID) && word.is_a?(Lexer::ID)
         is_integer = focus.is_a?(Lexer::Integer) && word.is_a?(Lexer::Integer)
