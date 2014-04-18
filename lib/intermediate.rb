@@ -12,12 +12,19 @@ module Intermediate
     end
   end
 
+  class Field
+    def initialize(type, id)
+      @type, @id = type, id
+    end
+  end
+
   class Method
-    def initialize(arg_list, return_type, procedure, return_statement)
+    def initialize(id, arg_list, return_type, procedure, return_statement)
+      @id,
       @arg_list,
-        @return_type,
-        @procedure,
-        @return_statement = arg_list, return_type, procedure, return_statement
+      @return_type,
+      @procedure,
+      @return_statement = id, arg_list, return_type, procedure, return_statement
     end
   end
 
@@ -121,4 +128,11 @@ module Intermediate
 
   class NullExpr < Expression
   end
+
+  class BooleanLiteral < Expression
+    def initialize(value)
+      @value = value
+    end
+  end
+
 end
