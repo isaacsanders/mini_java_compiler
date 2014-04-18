@@ -7,8 +7,8 @@ module Intermediate
   end
 
   class Class
-    def initialize(method_list, field_list, opt_extends)
-      @method_list, @field_list, @opt_extends = method_list, field_list, opt_extends
+    def initialize(id, method_list, field_list, opt_extends)
+      @id, @method_list, @field_list, @opt_extends = id, method_list, field_list, opt_extends
     end
   end
 
