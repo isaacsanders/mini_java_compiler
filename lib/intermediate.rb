@@ -10,11 +10,26 @@ module Intermediate
       @main_class.init_st(@symbol_table)
       @class_list.init_st(@symbol_table)
     end
+
+    def check_types
+      errors = []
+      @main_class.check_types(symbol_table, errors)
+      @class_list.each do |klass|
+        klass.check_types(symbol_table, errors)
+      end
+      errors
+    end
   end
 
   class Class
     def initialize(id, method_list, field_list, opt_extends)
       @id, @method_list, @field_list, @opt_extends = id, method_list, field_list, opt_extends
+    end
+
+    def check_types(symbol_table, errors)
+      if opt_extends
+        symbol_table
+      end
     end
   end
 
@@ -60,22 +75,30 @@ module Intermediate
   end
 
   class BlockStatement < Statement
-    procedure
+    def initialize(procedure)
+      @procedure = procedure
+    end
   end
 
   class IfElseStatement < Statement
-    condition_expr # bool type
-    true_statement
-    false_statement
+    def initialize(condition_expr, true_statement, false_statement)
+      @condition_expr = condition_expr # bool type
+      @true_statement = true_statement
+      @false_statement = false_statement
+    end
   end
 
   class WhileStatement < Statement
-    condition_expr # bool type
-    statement
+    def initialize(condition_expr, statement)
+      @condition_expr = condition_expr # bool type
+      @statement = statement
+    end
   end
 
   class PrintlnStatement < Statement
-    expr # int type
+    def initialize(expr)
+      @expr = expr # int type
+    end
   end
 
   class AssignStatement < Statement

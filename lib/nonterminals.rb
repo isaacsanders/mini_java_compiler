@@ -4,6 +4,10 @@ require_relative 'intermediate'
 
 class Nonterminal
   include Terminals
+
+  def epsilon?
+    not @epsilon.nil?
+  end
 end
 
 class Program < Nonterminal
@@ -14,7 +18,7 @@ class Program < Nonterminal
   def to_ir
     main_class_ir = @main_class_decl.to_ir
     other_classes_ir = @class_decl_list.to_ir
-    return Intermediate::Program.new(main_class_ir, )
+    return Intermediate::Program.new(main_class_ir, other_classes_ir)
   end
 end
 
@@ -25,7 +29,7 @@ class MainClassDecl < Nonterminal
 
   def to_ir
     field_list = []
-    method_list = [Intermediate::Method.new([Intermediate::Formal.new('String[]', @arg_id)], 'void', @stmt_list.to_ir, nil)]
+    method_list = [Intermediate::Method.new(main_rw, [Intermediate::Formal.new('String[]', @arg_id)], 'void', @stmt_list.to_ir, nil)]
     opt_extends = nil
     Intermediate::Class.new(@id, method_list, field_list, opt_extends)
   end
@@ -163,7 +167,7 @@ class Formal < Nonterminal
   end
 
   def to_ir
-    Intermediate::Formal.new(@type, @id)
+    Intermediate::Formal.new(@type.to_ir, @id)
   end
 end
 
@@ -171,9 +175,20 @@ class Type < Nonterminal
   def fill_slots(table_entry)
     @type = table_entry.first
   end
+
+  def to_ir
+    case @type
+    when TypeNotID
+      @type.type
+    when Lexer::ID
+      @type
+    end
+  end
 end
 
 class TypeNotID < Nonterminal
+  attr_reader :type
+
   def fill_slots(table_entry)
     @type = table_entry.first
   end
@@ -225,7 +240,7 @@ class Stmt < Nonterminal
   def to_ir
     case @stmt_type
     when :init
-      Intermediate::InitStatement.new(@type_not_id, @id, @expr.to_ir)
+      Intermediate::InitStatement.new(@type_not_id.type, @id, @expr.to_ir)
     when :block
       Intermediate::BlockStatement.new(@stmt_list.to_ir)
     when :ifelse
@@ -477,7 +492,7 @@ class Expr1Prime < Nonterminal
     if self.epsilon?
       expr0.to_ir
     else
-      @expr1_prime.to_ir!(Intermediate::MethodCallExpr(expr0.to_ir, @method, @arg_list.to_ir))
+      @expr1_prime.to_ir!(Intermediate::MethodCallExpr.new(expr0.to_ir, @method, @arg_list.to_ir))
     end
   end
 
@@ -485,7 +500,7 @@ class Expr1Prime < Nonterminal
     if self.epsilon?
       expr0
     else
-      @expr1_prime.to_ir!(Intermediate::MethodCallExpr(expr0, @method, @arg_list.to_ir))
+      @expr1_prime.to_ir!(Intermediate::MethodCallExpr.new(expr0, @method, @arg_list.to_ir))
     end
   end
 end
@@ -563,7 +578,7 @@ class Expr0 < Nonterminal
     when :true, :false
       Intermediate::BooleanLiteral.new(@value)
     when :init
-      Intermediate::InitExpression.new(@class)
+      Intermediate::InitExpr.new(@class)
     when :parens
       @expr.to_ir
     end
