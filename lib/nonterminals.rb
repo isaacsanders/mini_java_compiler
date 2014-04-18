@@ -2,62 +2,17 @@ require_relative 'terminals'
 
 class Nonterminal
   include Terminals
-
-  def epsilon?
-    not @epsilon.nil?
-  end
-
-  def id
-    @id.input_text
-  end
-
-  def spacing(nesting, *branches)
-    spacing = "  "
-    nesting.times do |n|
-      if n == branches
-        spacing += "|"
-      else
-        spacing += " "
-      end
-      spacing += "    "
-    end
-    spacing
-  end
 end
 
 class Program < Nonterminal
   def fill_slots(table_entry)
     @main_class_decl, @class_decl_list = table_entry
   end
-
-  def to_ast
-    Program.new(@main_class_decl.to_ast, @class_decl_list.to_ast)
-  end
-
-  def print_tree
-    print("Program\n")
-    @main_class_decl.print_tree
-    @class_decl_list.print_tree
-  end
 end
 
 class MainClassDecl < Nonterminal
   def fill_slots(table_entry)
     _, @id, _, _, _, _, _, _, _, _, _, @arg_id, _, _, @stmt_list, _, _ = table_entry
-  end
-
-  def id
-    @id.input_text
-  end
-
-  def arg_id
-    @arg_id.input_text
-  end
-
-  def print_tree
-    print("├-- MainClassDecl:#{id}", "\n")
-    print("|   └-- void main(String[] #{arg_id})", "\n")
-    @stmt_list.print_tree(2)
   end
 end
 
@@ -69,62 +24,21 @@ class ClassDeclList < Nonterminal
       @class_decl, @class_decl_list = table_entry
     end
   end
-
-  def print_tree
-    if epsilon?
-      print("└-- (eof)", "\n")
-    else
-      @class_decl.print_tree
-      @class_decl_list.print_tree
-    end
-  end
 end
 
 class ClassDecl < Nonterminal
   def fill_slots(table_entry)
     _, @id, @class_decl_prime = table_entry
   end
-
-  def extends?
-    @class_decl_prime.extends?
-  end
-
-  def extends_id
-    @class_decl_prime.extends_id
-  end
-
-  def method_decl_list
-    @class_decl_prime.method_decl_list
-  end
-
-  def print_tree
-    if extends?
-      print("└-- ClassDecl:#{id} < #{extends_id}", "\n")
-    else
-      print("└-- ClassDecl:#{id}", "\n")
-    end
-
-
-  end
 end
 
 class ClassDeclPrime < Nonterminal
-  attr_reader :class_var_decl_list, :method_decl_list
-
   def fill_slots(table_entry)
     if table_entry.length == 4
       _, @class_var_decl_list, @method_decl_list, _ = table_entry
     else
       _, @extends_id, _, @class_var_decl_list, @method_decl_list, _ = table_entry
     end
-  end
-
-  def extends?
-    not @extends_id.nil?
-  end
-
-  def extends_id
-    @extends_id.input_text
   end
 end
 
@@ -265,22 +179,11 @@ class StmtPrimeID < Nonterminal
       @id, _, @expr, _ = table_entry
     end
   end
-
-  def print_tree(nesting, *branches)
-    @expr.print_tree(nesting, *branches)
-  end
 end
 
 class Expr < Nonterminal
   def fill_slots(table_entry)
     @expr7, @expr_prime = table_entry
-  end
-
-  def print_tree(nesting, *branches)
-    spacing = spacing(nesting, *branches)
-    print("|#{spacing} └-- Expr\n")
-    @expr7.print_tree(nesting + 1)
-    @expr_prime.print_tree(nesting + 1)
   end
 end
 
@@ -292,27 +195,11 @@ class ExprPrime < Nonterminal
       @op, @expr7, @expr_prime = table_entry
     end
   end
-
-  def print_tree(nesting)
-    spacing = spacing(nesting)
-    if not epsilon?
-      print("|#{spacing} └-- OR\n")
-    end
-    @expr7.print_tree(nesting + 1)
-    @expr_prime.print_tree(nesting + 1)
-  end
 end
 
 class Expr7 < Nonterminal
   def fill_slots(table_entry)
     @expr6, @expr7_prime = table_entry
-  end
-
-  def print_tree(nesting)
-    spacing = spacing(nesting)
-    print("|#{spacing} └-- Expr7\n")
-    @expr6.print_tree(nesting + 1)
-    @expr7_prime.print_tree(nesting + 1)
   end
 end
 
@@ -324,27 +211,11 @@ class Expr7Prime < Nonterminal
       @op, @expr6, @expr7_prime = table_entry
     end
   end
-
-  def print_tree(nesting)
-    spacing = spacing(nesting)
-    if not epsilon?
-      print("|#{spacing} └-- AND\n")
-    end
-    @expr7.print_tree(nesting + 1)
-    @expr_prime.print_tree(nesting + 1)
-  end
 end
 
 class Expr6 < Nonterminal
   def fill_slots(table_entry)
     @expr5, @expr6_prime = table_entry
-  end
-
-  def print_tree(nesting)
-    spacing = spacing(nesting)
-    print("|#{spacing} └-- Expr6\n")
-    @expr6.print_tree(nesting + 1)
-    @expr7_prime.print_tree(nesting + 1)
   end
 end
 
