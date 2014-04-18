@@ -7,7 +7,9 @@ class Parser
   include Terminals
 
   class ExpandingFocusError
-
+    def initialize(focus, word)
+      @focus, @word = focus, word
+    end
   end
 
   class LookingForFocusError
@@ -24,31 +26,35 @@ class Parser
     tokens = @tokens.dup
     errors = []
     word = tokens.shift
-    ast = Program.new
+    parse_tree = Program.new
     stack = []
     stack.push(:eof)
-    stack.push(ast)
+    stack.push(parse_tree)
     focus = stack.last
     loop do
-      printf("focus: %s, word: %s\n", focus, word)
       if focus == :eof and word == :eof
-        return [ast, errors]
+        return [parse_tree, errors]
       elsif terminal?(focus) or focus == :eof
-        is_id = word.is_a? Lexer::ID
-        is_integer = word.is_a? Lexer::Integer
+        is_id = focus.is_a?(Lexer::ID) && word.is_a?(Lexer::ID)
+        is_integer = focus.is_a?(Lexer::Integer) && word.is_a?(Lexer::Integer)
         if (focus == word)
+          # printf("[SAME] %s\n", word)
           stack.pop
           word = tokens.shift
         elsif is_id or is_integer
           focus.input_text = word.input_text
+          # printf("[INPUT] %s\n", word)
           stack.pop
           word = tokens.shift
         else
+          # printf("[ERROR] focus: %s, word: %s\n", focus, word)
           errors << LookingForFocusError.new(focus)
-          stack.pop
+          word = tokens.shift unless word == :eof
+          stack.pop unless focus == :eof
         end
       else
         table_row = Grammar::PARSE_TABLE[focus.class]
+        # printf("[RULE] focus: %s, word: %s\n", focus, word)
         if [Lexer::ID, Lexer::Integer].any? {|t| word.kind_of? t }
           table_entry = table_row[word.class]
         else
@@ -75,8 +81,8 @@ class Parser
           end
           focus.fill_slots(slots)
         else
-          require 'pry'; binding.pry
-          errors << ExpandingFocusError.new
+          stack.pop
+          errors << ExpandingFocusError.new(focus, word)
         end
       end
       focus = stack.last

@@ -313,12 +313,14 @@ module Grammar
         fp_row[production] = FOLLOW[nonterminal].uniq
       elsif FIRST[production.first].include?(:epsilon)
         pd = production.dup
+        fp_row[production] = []
 
         begin
           last = pd.shift
+          fp_row[production] = (FIRST[last] + fp_row[production]).uniq
         end while FIRST[last].include?(:epsilon) and pd.length > 0
 
-        fp_row[production] = (FIRST[last] + FOLLOW[nonterminal]).uniq
+        fp_row[production] = (fp_row[production] + FOLLOW[nonterminal]).uniq
       else
         fp_row[production] = FIRST[production.first]
       end

@@ -36,7 +36,6 @@ class Lexer
         end
       end
 
-
       case state
       when :start, :id, :identifier_or_reserved, :forward_slash, :block_comment, :reserved_word, :one_or_two_char_operator, :equals, :nonzero_integer
       else
@@ -591,6 +590,9 @@ class Lexer
           state = :block_comment_star
         when "\n", "\r"
           lineno += 1
+        when :eof
+          errors << [lineno, column, "EOF Unexpected"]
+          is_done = true
         end
         char = nil
       when :block_comment_star
