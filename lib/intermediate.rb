@@ -1,4 +1,5 @@
 require_relative "symbol_table"
+require_relative "terminals"
 
 module Intermediate
   class DefineSuperclassFirstError
@@ -16,6 +17,18 @@ module Intermediate
   class ShadowingClassVariableError
     def initialize(klass_id, id)
       @klass_id, @id = klass_id, id
+    end
+  end
+
+  class ReturnTypeMismatch
+    def initialize(method_id)
+      @method_id = method_id
+    end
+  end
+
+  class UninitializedConstantError
+    def initialize(klass_id)
+      @klass_id = klass_id
     end
   end
 
@@ -41,8 +54,13 @@ module Intermediate
       @main_class.check_types(errors)
       @class_list.each_with_index do |klass, index|
         unless klass.opt_extends.nil?
-          if @class_list.map(&:id).index(klass.opt_extends) > index
-            errors << DefineSuperclassFirstError.new(klass.id)
+          extends_index = @class_list.map(&:id).index(klass.opt_extends)
+          if extends_index.nil?
+            errors << UninitializedConstantError.new(klass.opt_extends)
+          else
+            if extends_index > index
+              errors << DefineSuperclassFirstError.new(klass.id)
+            end
           end
         end
         klass.check_types(errors)
@@ -55,7 +73,10 @@ module Intermediate
     attr_reader :opt_extends, :id, :field_list, :symbol_table
 
     def initialize(id, method_list, field_list, opt_extends)
-      @id, @method_list, @field_list, @opt_extends = id, method_list, field_list, opt_extends
+      @id = id
+      @method_list = method_list
+      @field_list = field_list
+      @opt_extends = opt_extends
     end
 
     def init_st(parent)
@@ -71,22 +92,29 @@ module Intermediate
 
     def check_types(errors)
       if opt_extends
-        superclass = symbol_table.get_symbol(opt_extends).type
+        superclass = symbol_table.get_symbol(opt_extends)
+        unless superclass.nil?
+          superclass = symbol_table.get_symbol(opt_extends).type
+          field_to_a = Proc.new {|f| [f.type, f.id] }
+          super_field_set = Set.new(superclass.field_list.map &field_to_a )
+          field_set = Set.new(field_list.map &field_to_a )
 
-        unless field_list.map(&:id) == field_list.map(&:id).uniq
-          field_list.group_by(&:id).select {|id, fs| fs.length > 1 }.each do |(key, fs)|
-            errors << DuplicateFieldError.new(id, key)
+          unless super_field_set.disjoint?(field_set)
+            super_field_set.intersection(field_set).each do |(type, fid)|
+              errors << ShadowingClassVariableError.new(id, fid)
+            end
           end
         end
+      end
 
-        p super_field_set = Set.new(superclass.field_list.map {|f| [f.type, f.id] })
-        p field_set = Set.new(field_list.map {|f| [f.type, f.id] })
-
-        unless super_field_set.disjoint?(field_set)
-          super_field_set.intersection(field_set).each do |(type, fid)|
-            errors << ShadowingClassVariableError.new(id, fid)
-          end
+      unless field_list.map(&:id) == field_list.map(&:id).uniq
+        field_list.group_by(&:id).select {|id, fs| fs.length > 1 }.each do |(key, fs)|
+          errors << DuplicateFieldError.new(id, key)
         end
+      end
+
+      @method_list.each do |method|
+        method.check_types(errors)
       end
     end
   end
@@ -104,24 +132,49 @@ module Intermediate
   end
 
   class Method
+    include Terminals
+    attr_reader :arg_list, :return_type, :return_statement,
+      :id, :procedure, :symbol_table
+
     def initialize(id, arg_list, return_type, procedure, return_statement)
-      @id,
-      @arg_list,
-      @return_type,
-      @procedure,
-      @return_statement = id, arg_list, return_type, procedure, return_statement
+      @id = id
+      @arg_list = arg_list
+      @return_type = return_type
+      @procedure = procedure
+      @return_statement = return_statement
     end
 
     def init_st(parent)
-      parent.add_symbol(@return_type, @id)
-      @symbol_table = SymbolTable.new(parent)
-      @arg_list.each do |arg|
-        arg.init_st(@symbol_table)
+      parent.add_symbol(return_type, id)
+      symbol_table = SymbolTable.new(parent)
+      arg_list.each do |arg|
+        arg.init_st(symbol_table)
+      end
+      procedure.init_st(symbol_table)
+    end
+
+    def check_types(errors)
+      unless arg_list.map(&:name) == arg_list.map(&:name).uniq
+        arg_list.group_by(&:name).select {|id, as| as.length > 1 }.each do |(key, as)|
+          errors << DuplicateArgumentError.new(id, key)
+        end
+      end
+
+      if return_statement.nil?
+        unless id == main_rw
+          errors << MainMustBeVoidError.new
+        end
+      else
+        unless return_type == return_statement.to_type(procedure.symbol_table)
+          errors << ReturnTypeMismatch.new(id)
+        end
       end
     end
   end
 
   class Formal
+    attr_reader :name
+
     def initialize(type, name)
       @type, @name = type, name
     end
@@ -136,6 +189,10 @@ module Intermediate
   class Procedure
     def initialize(statement_list)
       @statement_list = statement_list
+    end
+
+    def symbol_table
+      @statement_list.last.symbol_table
     end
 
     def init_st(parent)
@@ -168,6 +225,8 @@ module Intermediate
   end
 
   class BlockStatement < Statement
+    attr_reader :procedure
+
     def initialize(procedure)
       @procedure = procedure
     end
@@ -290,6 +349,10 @@ module Intermediate
   class IDExpr < Expression
     def initialize(name)
       @name = name
+    end
+
+    def to_type(symbol_table)
+      symbol_table.get_symbol(@name).type
     end
   end
 
