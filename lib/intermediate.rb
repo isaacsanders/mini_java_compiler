@@ -4,6 +4,12 @@ module Intermediate
       @main_class = main_class
       @class_list = class_list
     end
+
+    def init_st # symbol table
+      @symbol_table = SymbolTable.new(nil)
+      @main_class.init_st(@symbol_table)
+      @class_list.init_st(@symbol_table)
+    end
   end
 
   class Class
