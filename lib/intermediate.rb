@@ -1,4 +1,24 @@
+require_relative "symbol_table"
+
 module Intermediate
+  class DefineSuperclassFirstError
+    def initialize(klass_id)
+      @klass_id = klass_id
+    end
+  end
+
+  class DuplicateFieldError
+    def initialize(klass_id, id)
+      @klass_id, @id = klass_id, id
+    end
+  end
+
+  class ShadowingClassVariableError
+    def initialize(klass_id, id)
+      @klass_id, @id = klass_id, id
+    end
+  end
+
   class Program
     attr_reader :symbol_table
 
@@ -11,27 +31,36 @@ module Intermediate
     def init_st # symbol table
       @symbol_table = SymbolTable.new(nil)
       @main_class.init_st(@symbol_table)
-      @class_list.init_st(@symbol_table)
+      @class_list.each do |klass|
+        klass.init_st(@symbol_table)
+      end
     end
 
     def check_types
       errors = []
-      @main_class.check_types(symbol_table, errors)
-      @class_list.each do |klass|
-        klass.check_types(symbol_table, errors)
+      @main_class.check_types(errors)
+      @class_list.each_with_index do |klass, index|
+        unless klass.opt_extends.nil?
+          if @class_list.map(&:id).index(klass.opt_extends) > index
+            errors << DefineSuperclassFirstError.new(klass.id)
+          end
+        end
+        klass.check_types(errors)
       end
       errors
     end
   end
 
   class Class
+    attr_reader :opt_extends, :id, :field_list, :symbol_table
+
     def initialize(id, method_list, field_list, opt_extends)
       @id, @method_list, @field_list, @opt_extends = id, method_list, field_list, opt_extends
     end
 
     def init_st(parent)
       @symbol_table = SymbolTable.new(parent)
-      parent.add_symbol("Class", @id)
+      parent.add_symbol(self, @id)
       @field_list.each do |f|
         f.init_st(@symbol_table)
       end
@@ -39,15 +68,32 @@ module Intermediate
         m.init_st(@symbol_table)
       end
     end
-    
-    def check_types(symbol_table, errors)
+
+    def check_types(errors)
       if opt_extends
-        symbol_table
+        superclass = symbol_table.get_symbol(opt_extends).type
+
+        unless field_list.map(&:id) == field_list.map(&:id).uniq
+          field_list.group_by(&:id).select {|id, fs| fs.length > 1 }.each do |(key, fs)|
+            errors << DuplicateFieldError.new(id, key)
+          end
+        end
+
+        p super_field_set = Set.new(superclass.field_list.map {|f| [f.type, f.id] })
+        p field_set = Set.new(field_list.map {|f| [f.type, f.id] })
+
+        unless super_field_set.disjoint?(field_set)
+          super_field_set.intersection(field_set).each do |(type, fid)|
+            errors << ShadowingClassVariableError.new(id, fid)
+          end
+        end
       end
     end
   end
 
   class Field
+    attr_reader :id, :type
+
     def initialize(type, id)
       @type, @id = type, id
     end
@@ -129,6 +175,7 @@ module Intermediate
     def init_st(parent)
       @symbol_table = SymbolTable.new(parent)
       procedure.init_st(parent)
+    end
   end
 
   class IfElseStatement < Statement
@@ -143,6 +190,7 @@ module Intermediate
       @condition_expr.init_st(@symbol_table)
       @true_statement.init_st(@symbol_table)
       @false_statement.init_st(@symbol_table)
+    end
   end
 
   class WhileStatement < Statement
@@ -155,6 +203,7 @@ module Intermediate
       super
       @condition_expr.init_st(@symbol_table)
       @statement.init_st(@symbol_table)
+    end
   end
 
   class PrintlnStatement < Statement
@@ -261,5 +310,4 @@ module Intermediate
       @value = value
     end
   end
-
 end

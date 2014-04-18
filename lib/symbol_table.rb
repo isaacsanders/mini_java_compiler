@@ -1,4 +1,6 @@
 class SymbolTable
+  attr_reader :parent
+
   def initialize(parent)
     @parent = parent
     @table = {}
@@ -28,14 +30,16 @@ class SymbolTable
 
   def get_symbol_from_parent(id)
     return nil if parent.nil?
-    parent.get(id)
+    parent.get_symbol(id)
   end
-  
+
   # todo check type of types
+  class Symbol
+    attr_reader :type
+
+    def initialize(type, id)
+      @type, @id = type, id
+    end
+  end
 end
 
-class Symbol
-  def initialize(type, id)
-    @type, @id = type, id
-  end
-end
