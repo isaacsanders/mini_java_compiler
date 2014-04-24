@@ -11,6 +11,21 @@ class MainClass {
 
 class Facter {
   public int fact(int n) {
+    int foo0 = 1 * this;
+    int foo1 = 1 / this;
+    int foo2 = 1 + this;
+    int foo3 = 1 - this;
+    int foo4 = this * 1;
+    int foo5 = this / 1;
+    int foo6 = this + 1;
+    int foo7 = this - 1;
+    boolean foo8 = true && this;
+    boolean foo9 = true || this;
+    boolean foo10 = this && true;
+    boolean foo11 = this || true;
+
+    int f = new Facter();
+
     int result = 0;
     if (n <= 0) {
       result = 1;

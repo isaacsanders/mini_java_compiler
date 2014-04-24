@@ -1,4 +1,5 @@
 class SymbolTable
+  PREEXISTS = :preexists
   attr_reader :parent
 
   def initialize(parent)
@@ -9,7 +10,7 @@ class SymbolTable
 
   def add_symbol(type, id)
     if self.get_symbol(id) # todo: fix cases where shadowing is ok
-      return :preexists
+      return ::SymbolTable::PREEXISTS
     else
       @table[id] = Symbol.new(type, id)
       return nil

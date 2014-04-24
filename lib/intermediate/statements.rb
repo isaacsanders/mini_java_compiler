@@ -1,0 +1,7 @@
+require_relative "statement"
+require_relative "init_statement"
+require_relative "block_statement"
+require_relative "if_else_statement"
+require_relative "while_statement"
+require_relative "println_statement"
+require_relative "assign_statement"

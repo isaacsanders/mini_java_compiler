@@ -18,7 +18,7 @@ class Program < Nonterminal
   def to_ir
     main_class_ir = @main_class_decl.to_ir
     other_classes_ir = @class_decl_list.to_ir
-    return Intermediate::Program.new(main_class_ir, other_classes_ir)
+    Intermediate::Program.new(main_class_ir, other_classes_ir)
   end
 end
 
@@ -29,7 +29,7 @@ class MainClassDecl < Nonterminal
 
   def to_ir
     field_list = []
-    method_list = [Intermediate::Method.new(main_rw, [Intermediate::Formal.new('String[]', @arg_id)], 'void', @stmt_list.to_ir, nil)]
+    method_list = [Intermediate::Method.new(main_rw, [Intermediate::Formal.new('String[]', @arg_id)], void_rw, @stmt_list.to_ir, nil)]
     opt_extends = nil
     Intermediate::Class.new(@id, method_list, field_list, opt_extends)
   end
@@ -572,11 +572,11 @@ class Expr0 < Nonterminal
     when :integer
       Intermediate::IntLiteralExpr.new(@value)
     when :this
-      Intermediate::ThisExpr.new()
+      Intermediate::ThisExpr.new
     when :null
-      Intermediate::NullExpr.new()
+      Intermediate::NullExpr.new
     when :true, :false
-      Intermediate::BooleanLiteral.new(@value)
+      Intermediate::BooleanLiteralExpr.new(@value)
     when :init
       Intermediate::InitExpr.new(@class)
     when :parens
