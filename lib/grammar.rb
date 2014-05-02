@@ -329,6 +329,16 @@ module Grammar
     first_plus
   end
 
+  FIRST_PLUS.each do |nonterminal, sets|
+    sets.each do |production, set|
+      sets.each do |other, other_set|
+        if production != other and Set.new.methods.member? :intersect?
+          raise 'hell' if Set.new(set).intersect?(Set.new(other_set))
+        end
+      end
+    end
+  end
+
   PARSE_TABLE = NONTERMINALS.reduce(Hash.new) do |parse_table, nonterminal|
     parse_table[nonterminal] ||= Hash.new
 
