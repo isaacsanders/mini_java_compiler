@@ -4,7 +4,7 @@ module Intermediate
   class Class
     include Terminals
 
-    attr_reader :opt_extends, :id, :field_list, :symbol_table
+    attr_reader :opt_extends, :id, :field_list, :symbol_table, :method_list
 
     def initialize(id, method_list, field_list, opt_extends)
       @id = id

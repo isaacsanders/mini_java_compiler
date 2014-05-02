@@ -12,5 +12,9 @@ module Intermediate
     def to_type(symbol_table)
       boolean_rw
     end
+
+    def check_types(errors)
+
+    end
   end
 end
