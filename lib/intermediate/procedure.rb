@@ -1,5 +1,7 @@
 module Intermediate
   class Procedure
+    attr_reader :statement_list
+
     def initialize(statement_list)
       @statement_list = statement_list
     end
@@ -17,6 +19,12 @@ module Intermediate
           stmt.symbol_table
         end
       end
+    end
+
+    def to_mips
+      statement_list.map do |stmt|
+        stmt.to_mips
+      end.join("\n")
     end
 
     def check_types(errors)

@@ -23,6 +23,12 @@ module Intermediate
       procedure.init_st(symbol_table)
     end
 
+    def to_mips
+      if main_rw == id
+        procedure.to_mips
+      end
+    end
+
     def check_types(errors)
       unless arg_list.map(&:name) == arg_list.map(&:name).uniq
         arg_list.group_by(&:name).select {|id, as| as.length > 1 }.each do |(key, as)|

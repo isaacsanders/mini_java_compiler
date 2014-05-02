@@ -2,6 +2,7 @@ require_relative "../symbol_table"
 
 module Intermediate
   class Program
+    include Terminals
     attr_reader :symbol_table
 
     def initialize(main_class, class_list)
@@ -16,6 +17,14 @@ module Intermediate
       @class_list.each do |klass|
         klass.init_st(@symbol_table)
       end
+    end
+
+    def to_mips
+      "main:\n" +
+      @main_class.method_list.detect do |method|
+        method.id == main_rw
+      end.to_mips + "\n" +
+      "jr $ra"
     end
 
     def check_types

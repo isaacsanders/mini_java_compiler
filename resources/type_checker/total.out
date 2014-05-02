@@ -1,0 +1,140 @@
+MethodReturnTypeMismatch:
+  fields: name, actual, declared
+  message: Actual return type #{actual} of method #{name} does not match declared type #{declared}
+
+Argument type boolean is incompatible with formal parameter type int
+Argument type int is incompatible with formal parameter type boolean
+Argument type null is incompatible with formal parameter type int
+
+Cannot assign type AClass to variable b of type AnotherClass
+Cannot assign type Bar to variable gamma of type int
+Cannot assign type Foo to variable bar of type Foo2
+Cannot assign type Test6 to variable e of type Test7
+Cannot assign type Test6 to variable f of type Test8
+Cannot assign type Test8 to variable h of type Test9
+Cannot assign type Xmas to variable roboticSanta of type Santa
+Cannot assign type boolean to variable alpha of type int
+Cannot assign type boolean to variable b of type int
+Cannot assign type boolean to variable i of type int
+Cannot assign type boolean to variable l1 of type int
+Cannot assign type boolean to variable myBoolean of type int
+Cannot assign type boolean to variable myInt of type int
+Cannot assign type boolean to variable result of type int
+Cannot assign type boolean to variable value of type int
+Cannot assign type boolean to variable x of type int
+Cannot assign type boolean to variable z of type int
+Cannot assign type int to variable a of type bool
+Cannot assign type int to variable a3 of type boolean
+Cannot assign type int to variable b of type boolean
+Cannot assign type int to variable hasCartoonishMascot of type boolean
+Cannot assign type int to variable x of type boolean
+Cannot assign type int to variable y of type boolean
+Cannot assign type null to variable nonExisting of type int
+Cannot assign type null to variable numNaughty of type int
+Cannot assign type null to variable x of type int
+Cannot assign type null to variable z of type boolean
+Cannot assign type null to variable z of type int
+
+Cannot find class named Baz
+Cannot find class named C
+Cannot find class named Nonexistant
+Cannot find class named Point
+Cannot find class named bool
+
+Cannot instantiate undeclared class named C
+Cannot instantiate undeclared class named Point
+
+Cannot overload methods.  Method bad has different type signature than inherited method of the same name.
+Cannot overload methods.  Method equal has different type signature than inherited method of the same name.
+Cannot overload methods.  Method method has different type signature than inherited method of the same name.
+Cannot overload methods.  Method ossifrage has different type signature than inherited method of the same name.
+Cannot overload methods.  Method overrideWithTooFew has different type signature than inherited method of the same name.
+Cannot overload methods.  Method overrideWithTooMany has different type signature than inherited method of the same name.
+Cannot overload methods.  Method predicate has different type signature than inherited method of the same name.
+Cannot overload methods.  Method self has different type signature than inherited method of the same name.
+Cannot overload methods.  Method start has different type signature than inherited method of the same name.
+Cannot overload methods.  Method switchParameterTypes has different type signature than inherited method of the same name.
+
+Cannot redeclare method equal
+Cannot redeclare method predicate
+Cannot redeclare method self
+Cannot redeclare method setB
+Cannot redeclare method start
+Cannot redeclare method tryToRedeclare
+
+Class named A already exists.
+Class named Point already exists.
+Class named start already exists.
+
+Condition for if statement is of type int instead of boolean
+
+Formal parameter named Foo duplicates the name of another formal parameter.
+
+In MiniJava, System.out.println only takes an int.  The expression has type Class2
+In MiniJava, System.out.println only takes an int.  The expression has type boolean
+In MiniJava, System.out.println only takes an int.  The expression has type null
+
+Left argument of type boolean does not match expected type int for operator GT
+Left argument of type boolean does not match expected type int for operator MINUS
+Left argument of type boolean does not match expected type int for operator PLUS
+Left argument of type int does not match expected type boolean for operator AND
+Left argument of type int does not match expected type boolean for operator OR
+Left argument of type null does not match expected type boolean for operator OR
+Left argument of type null does not match expected type int for operator PLUS
+
+No method named a5 found for class A6
+No method named add found for class null
+No method named developLists found for class Dude
+No method named fib found for class null
+No method named nonExistingMethod found for class Foo
+
+No variable named a exists in the current scope.
+No variable named b exists in the current scope.
+No variable named y exists in the current scope.
+
+Operand type boolean is not compatible with expected type int of operator MINUS
+Operand type int is not compatible with expected type boolean of operator NOT
+
+Right argument of type LightBulb does not match expected type int for operator PLUS
+Right argument of type boolean does not match expected type int for operator DIVIDE
+Right argument of type boolean does not match expected type int for operator LT
+Right argument of type boolean does not match expected type int for operator MINUS
+Right argument of type boolean does not match expected type int for operator PLUS
+Right argument of type int does not match expected type boolean for operator AND
+Right argument of type int does not match expected type boolean for operator OR
+Right argument of type null does not match expected type int for operator PLUS
+
+Success!
+
+Superclass name Bar not in scope.
+Superclass name DoesNotExist not in scope.
+Superclass name Foo not in scope.
+Superclass name Foo1 not in scope.
+Superclass name NextOne not in scope.
+
+The class variable a is already declared.  Redeclaration and shadowing are not allowed.
+The class variable avar is already declared.  Redeclaration and shadowing are not allowed.
+The class variable x is already declared.  Redeclaration and shadowing are not allowed.
+The class variable y is already declared.  Redeclaration and shadowing are not allowed.
+
+The operand types, null and int, are not compatible for equality comparison
+
+The variable a is already declared in the current scope.
+The variable b is already declared in the current scope.
+The variable c is already declared in the current scope.
+The variable i is already declared in the current scope.
+The variable maybe is already declared in the current scope.
+The variable x is already declared in the current scope.
+The variable y is already declared in the current scope.
+
+Variable a is not declared.
+Variable arg is not declared.
+Variable args is not declared.
+Variable bar is not declared.
+Variable baz is not declared.
+Variable c is not declared.
+Variable this is not declared.
+Variable x is not declared.
+Variable y is not declared.
+
+While loop condition must be a boolean.  The expressions has type int
