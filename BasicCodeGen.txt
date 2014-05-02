@@ -1,0 +1,5 @@
+Code generation is managed in the "to_mips" method on classes in lib/intermediate
+
+Usage:
+
+ruby ./bin/simple_code_generator.rb [FILE] to get the MIPS output
