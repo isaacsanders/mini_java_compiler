@@ -17,7 +17,7 @@ module Intermediate
     end
 
     def to_code
-      "(#{to_type(symbol_table).input_text}) #{name}"
+      to_type(symbol_table).to_code
     end
   end
 end

@@ -21,10 +21,7 @@ module Intermediate
 
     def to_mips
       "main:\n" +
-      @main_class.method_list.detect do |method|
-        method.id == main_rw
-      end.to_mips + "\n" +
-      "jr $ra"
+      @main_class.method_list.map(&:to_mips).join("\n")
     end
 
     def check_types

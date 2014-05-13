@@ -6,6 +6,10 @@ module Intermediate
       @type, @id = type, id
     end
 
+    def to_code
+      id.to_code
+    end
+
     def init_st(parent)
       parent.add_symbol(@type, @id)
     end

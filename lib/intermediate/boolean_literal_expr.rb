@@ -5,6 +5,8 @@ module Intermediate
   class BooleanLiteralExpr < Expression
     include Terminals
 
+    attr_reader :value
+
     def initialize(value)
       @value = value
     end
@@ -15,6 +17,10 @@ module Intermediate
 
     def check_types(errors)
 
+    end
+
+    def to_code
+      value.input_text
     end
   end
 end

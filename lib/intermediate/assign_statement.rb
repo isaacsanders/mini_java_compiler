@@ -16,10 +16,10 @@ module Intermediate
 
     def check_types(errors)
       value_expr.check_types(errors)
-      expected = symbol_table.get_symbol(id)
+      declared = symbol_table.get_symbol(id).type
       actual = value_expr.to_type(symbol_table)
-      unless actual == expected
-        errors << TypeMismatchError.new(id, expected, actual)
+      unless actual == declared
+        errors << InvalidAssignmentError.new(id, actual, declared)
       end
     end
   end

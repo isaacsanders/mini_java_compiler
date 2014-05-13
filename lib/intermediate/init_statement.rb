@@ -17,8 +17,9 @@ module Intermediate
     end
 
     def check_types(errors)
-      unless type == expr.to_type(symbol_table)
-        errors << UnexpectedTypeError.new(expr, type)
+      actual = expr.to_type(symbol_table)
+      unless type == actual
+        errors << InvalidAssignmentError.new(id, actual, type)
       end
 
       expr.check_types(errors)

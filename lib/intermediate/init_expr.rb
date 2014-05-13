@@ -14,7 +14,7 @@ module Intermediate
     end
 
     def to_type(symbol_table)
-      @klass
+      klass
     end
 
     def check_types(errors)

@@ -16,7 +16,7 @@ module Intermediate
 
     def init_st(parent)
       parent.add_symbol(return_type, id)
-      symbol_table = SymbolTable.new(parent)
+      @symbol_table = SymbolTable.new(parent)
       arg_list.each do |arg|
         arg.init_st(symbol_table)
       end
@@ -25,25 +25,32 @@ module Intermediate
 
     def to_mips
       if main_rw == id
-        procedure.to_mips
+        {
+          data: {},
+          text: {
+            main: [procedure.to_mips] + ["jr $ra"]
+          }
+        }
+      else
+
       end
     end
 
     def check_types(errors)
       unless arg_list.map(&:name) == arg_list.map(&:name).uniq
         arg_list.group_by(&:name).select {|id, as| as.length > 1 }.each do |(key, as)|
-          errors << DuplicateArgumentError.new(id, key)
+          errors << DuplicateFormalError.new(id)
         end
       end
 
       if return_statement.nil?
         unless id == main_rw
-          errors << TypeMismatchError.new(id, return_type, void_rw)
+          errors << MethodReturnTypeMismatchError.new(id, return_type, void_rw)
         end
       else
         actual_type = return_statement.to_type(procedure.symbol_table)
         unless return_type == actual_type
-          errors << TypeMismatchError.new(id, return_type, actual_type)
+          errors << MethodReturnTypeMismatchError.new(id, return_type, actual_type)
         end
       end
 

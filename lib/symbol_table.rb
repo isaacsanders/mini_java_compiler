@@ -36,10 +36,14 @@ class SymbolTable
 
   # todo check type of types
   class Symbol
-    attr_reader :type
+    attr_reader :type, :id
 
     def initialize(type, id)
       @type, @id = type, id
+    end
+
+    def input_text
+      id.input_text
     end
   end
 end
