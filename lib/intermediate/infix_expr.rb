@@ -5,6 +5,7 @@ require_relative '../terminals'
 module Intermediate
   class InfixExpr < Expression
     extend Terminals
+    include Terminals
 
     OPERATOR_TYPES = {
       add_o => {
@@ -66,6 +67,14 @@ module Intermediate
         lhs: boolean_rw,
         rhs: boolean_rw,
         returns: boolean_rw
+      },
+      eq_o => {
+        name: "EQUAL",
+        returns: boolean_rw
+      },
+      neq_o => {
+        name: "NOTEQUALS",
+        returns: boolean_rw
       }
     }
 
@@ -82,16 +91,24 @@ module Intermediate
     end
 
     def check_types(errors)
+      p op
       type_signature = OPERATOR_TYPES[op]
-      unless type_signature[:lhs] == lhs.to_type(symbol_table)
-        errors << InvalidLeftArgument.new(lhs, type_signature[:lhs], type_signature[:name])
-      end
-      unless type_signature[:rhs] == rhs.to_type(symbol_table)
-        errors << InvalidRightArgument.new(rhs, type_signature[:rhs], type_signature[:name])
+      if [eq_o, neq_o].include? op
+        if lhs.to_type == rhs.to_type
+        else
+          errors << InvalidRightArgument.new(rhs, lhs.to_type, type_signature[:name])
+        end
+      else
+        unless type_signature[:lhs] == lhs.to_type
+          errors << InvalidLeftArgument.new(lhs, type_signature[:lhs], type_signature[:name])
+        end
+        unless type_signature[:rhs] == rhs.to_type
+          errors << InvalidRightArgument.new(rhs, type_signature[:rhs], type_signature[:name])
+        end
       end
     end
 
-    def to_type(symbol_table)
+    def to_type
       OPERATOR_TYPES[op][:returns]
     end
   end

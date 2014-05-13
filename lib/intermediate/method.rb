@@ -14,13 +14,23 @@ module Intermediate
       @return_statement = return_statement
     end
 
+    def type_signature
+      {
+        returns: return_type,
+        args: arg_list.map(&:type)
+      }
+    end
+
     def init_st(parent)
       parent.add_symbol(return_type, id)
       @symbol_table = SymbolTable.new(parent)
-      arg_list.each do |arg|
-        arg.init_st(symbol_table)
+      arg_list.each do |formal|
+        symbol_table.add_symbol(formal.type, formal.name)
       end
       procedure.init_st(symbol_table)
+      if id != main_rw
+        return_statement.init_st(procedure.symbol_table)
+      end
     end
 
     def to_mips
@@ -48,7 +58,7 @@ module Intermediate
           errors << MethodReturnTypeMismatchError.new(id, return_type, void_rw)
         end
       else
-        actual_type = return_statement.to_type(procedure.symbol_table)
+        actual_type = return_statement.to_type
         unless return_type == actual_type
           errors << MethodReturnTypeMismatchError.new(id, return_type, actual_type)
         end

@@ -13,7 +13,7 @@ module Intermediate
       # todo?
     end
 
-    def to_type(symbol_table)
+    def to_type
       klass
     end
 

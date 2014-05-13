@@ -35,7 +35,11 @@ module Intermediate
     end
 
     def superclass
-      symbol_table.get_symbol(opt_extends).type
+      if opt_extends.nil?
+        :none
+      else
+        symbol_table.get_symbol(opt_extends).type
+      end
     end
 
     def init_st(parent)
@@ -64,6 +68,10 @@ module Intermediate
       }
     end
 
+    def to_code
+      id
+    end
+
     def check_types(errors)
       if opt_extends
         superclass = symbol_table.get_symbol(opt_extends)
@@ -79,11 +87,14 @@ module Intermediate
             end
           end
 
-          super_method_list = Set.new(superclass.method_list.map(&:id))
-          local_method_list = Set.new(method_list.map(&:id))
+          method_to_a = Proc.new {|m| [m.id, m.type_signature] }
+          super_method_list = superclass.method_list.map &method_to_a
+          local_method_list = method_list.map &method_to_a
 
-          unless super_method_list.disjoint?(local_method_list)
-            super_method_list.intersection(local_method_list).each do |method_id|
+          unless Set.new(super_method_list.map(&:first)).disjoint?(Set.new(local_method_list.map(&:first)))
+            super_method_list.zip(local_method_list).select do |((m1, ts1), (m2, ts2))|
+              m1 == m2 && ts1 != ts2 # names are the same, but type signatures are different
+            end.map {|((m, _), _)| m }.each do |method_id|
               errors << OverloadedMethodError.new(method_id)
             end
           end

@@ -24,7 +24,7 @@ module Intermediate
       @op, @expr = op, expr
     end
 
-    def to_type(symbol_table)
+    def to_type
       OPERATOR_TYPES[op][:returns]
     end
 

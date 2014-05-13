@@ -26,7 +26,7 @@ module Intermediate
     end
 
     def check_types(errors)
-      if expr.to_type(symbol_table) != int_rw
+      if expr.to_type != int_rw
         errors << ArgumentMismatchError.new(system_out_println_rw, int_rw)
       end
     end
