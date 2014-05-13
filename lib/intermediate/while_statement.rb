@@ -19,7 +19,7 @@ module Intermediate
     end
 
     def check_types(errors)
-      unless condition_expr.to_type(symbol_table) == boolean_rw
+      unless condition_expr.to_type == boolean_rw
         errors << UnexpectedTypeError.new(condition_expr, boolean_rw)
       end
 

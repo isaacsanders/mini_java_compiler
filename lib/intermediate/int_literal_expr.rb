@@ -11,7 +11,7 @@ module Intermediate
       @value = value
     end
 
-    def to_type(symbol_table)
+    def to_type
       int_rw
     end
 

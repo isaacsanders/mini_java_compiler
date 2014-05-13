@@ -29,6 +29,7 @@ class Parser
     word = tokens.shift
     parse_tree = Program.new
     stack = []
+    recent = []
     stack.push(:eof)
     stack.push(parse_tree)
     focus = stack.last
@@ -51,6 +52,7 @@ class Parser
           word = tokens.shift
         else
           # printf("[ERROR] focus: %s, word: %s\n", focus, word)
+          p recent
           errors << LookingForFocusError.new(focus)
           word = tokens.shift unless word == :eof
           stack.pop unless focus == :eof
@@ -82,6 +84,7 @@ class Parser
               slots.unshift(token)
             end
           end
+          recent = recent.last(2) + [slots] unless slots.include?(:epsilon)
           focus.fill_slots(slots)
         else
           stack.pop

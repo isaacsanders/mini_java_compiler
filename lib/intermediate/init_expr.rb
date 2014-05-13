@@ -13,8 +13,8 @@ module Intermediate
       # todo?
     end
 
-    def to_type(symbol_table)
-      @klass
+    def to_type
+      klass
     end
 
     def check_types(errors)

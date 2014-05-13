@@ -1,0 +1,44 @@
+GEM
+  remote: https://api.rubygems.org/
+  specs:
+    awesome_print (1.2.0)
+      fakefs (>= 0.2.1)
+      rspec (>= 2.6.0)
+    hoe (3.12.0)
+      minitest (~> 5.3)
+      rake (>= 0.8, < 11.0)
+      rdoc (~> 4.0)
+    json (1.8.1)
+      permutation
+      sdoc (~> 0.3.16)
+    minitest (5.3.3)
+      hoe (~> 3.11)
+      rdoc (~> 4.0)
+    rake (10.3.1)
+      hoe (~> 3.7)
+      minitest (~> 5.2)
+      rdoc (~> 4.0)
+    rdoc (4.1.1)
+      hoe (~> 3.7)
+      json (~> 1.4)
+      kpeg (~> 0.9)
+      minitest (~> 5.2)
+      racc (~> 1.4, > 1.4.10)
+      rdoc (~> 4.0)
+    rgl (0.4.0)
+      rake
+      stream (>= 0.5)
+    stream (0.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  awesome_print
+  hoe (~> 3.7)
+  json (~> 1.4)
+  minitest (~> 5.2)
+  rake
+  rdoc (~> 4.0)
+  rgl
+  stream (>= 0.5)

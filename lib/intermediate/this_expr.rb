@@ -7,7 +7,7 @@ module Intermediate
 
     attr_reader :symbol_table
 
-    def to_type(symbol_table)
+    def to_type
       symbol_table.get_symbol(this_rw).type
     end
 
