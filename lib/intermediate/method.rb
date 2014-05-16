@@ -66,6 +66,10 @@ module Intermediate
         if return_type != actual_type and actual_type != :not_declared
           errors << MethodReturnTypeMismatchError.new(name, return_type, actual_type)
         end
+
+        if actual_type == :not_declared
+          errors << NoClassError.new(return_type.input_text)
+        end
       end
 
       procedure.check_types(errors)

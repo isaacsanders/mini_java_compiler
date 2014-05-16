@@ -5,6 +5,7 @@ module Intermediate
     include Terminals
 
     attr_reader :opt_extends, :id, :field_list, :symbol_table, :method_list
+    attr_writer :already_exists
 
     def initialize(id, method_list, field_list, opt_extends)
       @id = id
@@ -93,46 +94,54 @@ module Intermediate
       opt_extends.input_text
     end
 
+    def already_exists?
+      @already_exists
+    end
+
     def check_types(errors)
-      unless opt_extends.nil?
-        if superclass == :class_doesnt_exist
-          errors << NoClassError.new(superclass_name)
-        else
-          field_to_a = Proc.new {|f| [f.type, f.id] }
-          super_field_list = superclass.field_list.map &field_to_a
-          local_field_list = @field_list.map &field_to_a
+      if already_exists?
+        errors << ClassRedeclarationError.new(name)
+      else
+        unless opt_extends.nil?
+          if superclass == :class_doesnt_exist
+            errors << NoClassError.new(superclass_name)
+          else
+            field_to_a = Proc.new {|f| [f.type, f.id] }
+            super_field_list = superclass.field_list.map &field_to_a
+            local_field_list = @field_list.map &field_to_a
 
-          unless super_field_list == local_field_list
-            local_field_list.group_by {|(t,f)| f }
-            .select {|f, fs| fs.length > 1 }
-            .map(&:last)
-            .each do |(type, (_, fid))|
-              errors << ShadowingClassVariableError.new(fid.input_text)
+            unless super_field_list == local_field_list
+              local_field_list.group_by {|(t,f)| f }
+              .select {|f, fs| fs.length > 1 }
+              .map(&:last)
+              .each do |(type, (_, fid))|
+                errors << ShadowingClassVariableError.new(fid.input_text)
+              end
             end
-          end
 
-          method_to_a = Proc.new {|m| [m.id, m.type_signature] }
-          super_method_list = superclass.method_list.map &method_to_a
-          local_method_list = method_list.map &method_to_a
+            method_to_a = Proc.new {|m| [m.id, m.type_signature] }
+            super_method_list = superclass.method_list.map &method_to_a
+            local_method_list = method_list.map &method_to_a
 
-          unless Set.new(super_method_list.map(&:first)).disjoint?(Set.new(local_method_list.map(&:first)))
-            super_method_list.zip(local_method_list).select do |((m1, ts1), (m2, ts2))|
-              m1 == m2 && ts1 != ts2 # names are the same, but type signatures are different
-            end.map {|((m, _), _)| m }.each do |method_id|
-              errors << OverloadedMethodError.new(method_id.input_text)
+            unless Set.new(super_method_list.map(&:first)).disjoint?(Set.new(local_method_list.map(&:first)))
+              super_method_list.zip(local_method_list).select do |((m1, ts1), (m2, ts2))|
+                m1 == m2 && ts1 != ts2 # names are the same, but type signatures are different
+              end.map {|((m, _), _)| m }.each do |method_id|
+                errors << OverloadedMethodError.new(method_id.input_text)
+              end
             end
           end
         end
-      end
 
-      unless field_list.map(&:id) == field_list.map(&:id).uniq
-        field_list.group_by(&:id).select {|id, fs| fs.length > 1 }.each do |(key, fs)|
-          errors << ShadowingClassVariableError.new(id.input_text)
+        unless field_list.map(&:id) == field_list.map(&:id).uniq
+          field_list.group_by(&:id).select {|id, fs| fs.length > 1 }.each do |(key, fs)|
+            errors << ShadowingClassVariableError.new(fs.first.name)
+          end
         end
-      end
 
-      @method_list.each do |method|
-        method.check_types(errors)
+        @method_list.each do |method|
+          method.check_types(errors)
+        end
       end
     end
   end

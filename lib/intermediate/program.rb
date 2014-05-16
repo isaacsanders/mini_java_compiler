@@ -13,10 +13,18 @@ module Intermediate
 
     def init_st # symbol table
       @symbol_table = SymbolTable.new(nil)
+      classes.group_by(&:id).select {|id, cls| cls.length > 1 }.each do |(id, cls)|
+        cl = cls.first
+        cl.already_exists = true
+      end
       @main_class.init_st(@symbol_table)
       @class_list.each do |klass|
         klass.init_st(@symbol_table)
       end
+    end
+
+    def classes
+      [@main_class] + @class_list
     end
 
     def to_mips
