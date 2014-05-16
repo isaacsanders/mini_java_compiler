@@ -16,20 +16,15 @@ module Intermediate
       symbol_table.add_symbol(type, id)
     end
 
+    def name
+      id.input_text
+    end
+
     def check_types(errors)
       actual = expr.to_type
 
-      if actual.is_a? Lexer::ID
-        current = symbol_table.get_symbol(actual).type
-        ancestors = []
-        until current == :none
-          ancestors << current
-          current = current.superclass
-        end
-      else
-        unless type == actual
-          errors << InvalidAssignmentError.new(id, actual, type)
-        end
+      if type != actual and actual != :not_declared
+        errors << InvalidAssignmentError.new(name, actual, type)
       end
 
       expr.check_types(errors)

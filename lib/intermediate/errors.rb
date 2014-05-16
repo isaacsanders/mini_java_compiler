@@ -1,9 +1,21 @@
 module Intermediate
-  class ErrorBase
+  class NameErrorBase
     attr_reader :name
 
     def initialize(name)
-      @name = name.to_code
+      @name = name
+    end
+
+    def message
+      raise NotImplementedError.new("Subclass this class and implement `message`")
+    end
+  end
+
+  class TypeErrorBase
+    attr_reader :type
+
+    def initialize(type)
+      @type = type.input_text
     end
 
     def message
@@ -15,9 +27,9 @@ module Intermediate
     attr_reader :name, :declared, :actual
 
     def initialize name, declared, actual
-      @name = name.to_code
-      @declared = declared.to_code
-      @actual = actual.to_code
+      @name = name
+      @declared = declared.input_text
+      @actual = actual.input_text
     end
 
     def message
@@ -29,8 +41,8 @@ module Intermediate
     attr_reader :actual, :declared
 
     def initialize actual, declared
-      @actual = actual.to_code
-      @declared = declared.to_code
+      @actual = actual.input_text
+      @declared = declared.input_text
     end
 
     def message
@@ -42,9 +54,9 @@ module Intermediate
     attr_reader :name, :actual, :declared
 
     def initialize name, actual, declared
-      @name = name.to_code
-      @actual = actual.to_code
-      @declared = declared.to_code
+      @name = name
+      @actual = actual.input_text
+      @declared = declared.input_text
     end
 
     def message
@@ -52,53 +64,49 @@ module Intermediate
     end
   end
 
-  class NoClassError < ErrorBase
+  class NoClassError < NameErrorBase
     def message
       "Cannot find class named #{name}"
     end
   end
 
-  class InvalidInstantiationError < ErrorBase
+  class InvalidInstantiationError < NameErrorBase
     def message
       "Cannot instantiate undeclared class named #{name}"
     end
   end
 
-  class OverloadedMethodError < ErrorBase
+  class OverloadedMethodError < NameErrorBase
     def message
-      "Cannot overload methods. Method #{name} has different type signature than inherited method of the same name."
+      "Cannot overload methods.  Method #{name} has different type signature than inherited method of the same name."
     end
   end
 
-  class MethodRedeclarationError < ErrorBase
+  class MethodRedeclarationError < NameErrorBase
     def message
       "Cannot redeclare method #{name}"
     end
   end
 
-  class ClassRedeclarationError < ErrorBase
+  class ClassRedeclarationError < NameErrorBase
     def message
       "Class named #{name} already exists."
     end
   end
 
-  class NonbooleanIfConditionError < ErrorBase
-    alias type name
-
+  class NonbooleanIfConditionError < TypeErrorBase
     def message
       "Condition for if statement is of type #{type} instead of boolean"
     end
   end
 
-  class DuplicateFormalError < ErrorBase
+  class DuplicateFormalError < NameErrorBase
     def message
       "Formal parameter named #{name} duplicates the name of another formal parameter."
     end
   end
 
-  class InvalidPrintlnError < ErrorBase
-    alias type name
-
+  class InvalidPrintlnError < TypeErrorBase
     def message
       "In MiniJava, System.out.println only takes an int. The expression has type #{type}"
     end
@@ -108,8 +116,8 @@ module Intermediate
     attr_reader :name, :type
 
     def initialize(name, type)
-      @name = name.to_code
-      @type = type.to_code
+      @name = name
+      @type = type.input_text
     end
 
     def message
@@ -117,7 +125,7 @@ module Intermediate
     end
   end
 
-  class UndeclaredVariableError < ErrorBase
+  class UndeclaredVariableError < NameErrorBase
     def message
       "No variable named #{name} exists in the current scope."
     end
@@ -127,8 +135,8 @@ module Intermediate
     attr_reader :actual, :expected, :operator
 
     def initialize(actual, expected, operator)
-      @actual = actual.to_code
-      @expected = expected.to_code
+      @actual = actual.input_text
+      @expected = expected.input_text
       @operator = operator
     end
   end
@@ -151,13 +159,13 @@ module Intermediate
     end
   end
 
-  class UndefinedSuperclassError < ErrorBase
+  class UndefinedSuperclassError < NameErrorBase
     def message
       "Superclass name #{name} not in scope."
     end
   end
 
-  class ShadowingClassVariableError < ErrorBase
+  class ShadowingClassVariableError < NameErrorBase
     def message
       "The class variable #{name} is already declared.  Redeclaration and shadowing are not allowed."
     end
@@ -167,7 +175,7 @@ module Intermediate
     attr_reader :lhs, :rhs
 
     def initialize(lhs, rhs)
-      @lhs, @rhs = lhs.to_code, rhs.to_code
+      @lhs, @rhs = lhs.input_text, rhs.input_text
     end
 
     def message
@@ -175,21 +183,19 @@ module Intermediate
     end
   end
 
-  class LocalVariableRedeclarationError < ErrorBase
+  class LocalVariableRedeclarationError < NameErrorBase
     def message
       "The variable #{name} is already declared in the current scope."
     end
   end
 
-  class UndeclaredVariableError < ErrorBase
+  class UndeclaredVariableError < NameErrorBase
     def message
       "Variable #{name} is not declared."
     end
   end
 
-  class NonbooleanWhileConditionError < ErrorBase
-    alias type name
-
+  class NonbooleanWhileConditionError < TypeErrorBase
     def message
       "While loop condition must be a boolean.  The expressions has type #{type}"
     end

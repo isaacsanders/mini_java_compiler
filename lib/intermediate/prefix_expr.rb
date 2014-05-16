@@ -5,7 +5,7 @@ module Intermediate
   class PrefixExpr < Expression
     extend Terminals
 
-    attr_reader :op
+    attr_reader :op, :expr, :symbol_table
 
     OPERATOR_TYPES = {
       sub_o => {
@@ -30,7 +30,13 @@ module Intermediate
 
     def init_st(parent)
       super
-      @expr.init_st(@symbol_table)
+      expr.init_st(symbol_table)
+    end
+
+    def check_types(errors)
+      unless expr.to_type == OPERATOR_TYPES[op][:arg]
+        errors << InvalidUnaryArgument.new(expr.to_type, OPERATOR_TYPES[op][:arg], OPERATOR_TYPES[op][:name])
+      end
     end
   end
 end

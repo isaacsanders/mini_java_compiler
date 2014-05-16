@@ -29,6 +29,22 @@ class SymbolTable
     end
   end
 
+  def add_class(type, id)
+    add_symbol(type, [:class, id])
+  end
+
+  def get_class(id)
+    get_symbol([:class, id])
+  end
+
+  def add_field(type, id)
+    add_symbol(type, [:field, id])
+  end
+
+  def get_field(id)
+    get_symbol([:field, id])
+  end
+
   def get_symbol_from_parent(id)
     return nil if parent.nil?
     parent.get_symbol(id)

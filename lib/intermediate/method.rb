@@ -46,21 +46,25 @@ module Intermediate
       end
     end
 
+    def name
+      id.input_text
+    end
+
     def check_types(errors)
       unless arg_list.map(&:name) == arg_list.map(&:name).uniq
         arg_list.group_by(&:name).select {|id, as| as.length > 1 }.each do |(key, as)|
-          errors << DuplicateFormalError.new(id)
+          errors << DuplicateFormalError.new(id.input_text)
         end
       end
 
       if return_statement.nil?
         unless id == main_rw
-          errors << MethodReturnTypeMismatchError.new(id, return_type, void_rw)
+          errors << MethodReturnTypeMismatchError.new(name, return_type, void_rw)
         end
       else
         actual_type = return_statement.to_type
-        unless return_type == actual_type
-          errors << MethodReturnTypeMismatchError.new(id, return_type, actual_type)
+        if return_type != actual_type and actual_type != :not_declared
+          errors << MethodReturnTypeMismatchError.new(name, return_type, actual_type)
         end
       end
 

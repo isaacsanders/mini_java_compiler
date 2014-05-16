@@ -21,28 +21,42 @@ module Intermediate
     end
 
     def caller_class
-      @caller_class ||= symbol_table.get_symbol(expr.to_type).type
+      symbol = symbol_table.get_class(expr.to_type)
+      if symbol.nil?
+        :not_declared
+      else
+        symbol.type
+      end
     end
 
     def to_type
-      caller_class.method_type(method_id)
+      if caller_class == :not_declared
+        :not_declared
+      else
+        caller_class.method_type(method_id)
+      end
     end
 
-    def to_code
-      args = arg_list.map(&:to_code).join(", ")
-      "#{expr.to_code}.#{method_id.input_text}(#{args})"
+    def method_name
+      method_id.input_text
     end
 
     def check_types(errors)
-      method = caller_class.method_list.detect {|m| m.id == method_id }
-      if method.nil?
-        errors << Intermediate::NoMethodError.new(method_id, expr)
-      else
-        arg_list.map(&:to_type).zip(method.arg_list.map(&:type)).select do |(actual, expected)|
-          actual == expected
-        end.each do |(actual, expected)|
-          errors << UnexpectedTypeError.new(actual, expected.type)
+      if caller_class != :not_declared
+        method = caller_class.method_list.detect {|m| m.id == method_id }
+        if method.nil?
+          errors << Intermediate::NoMethodError.new(method_name, expr.to_type)
+        else
+          arg_list.map(&:to_type).zip(method.arg_list.map(&:type)).select do |(actual, declared)|
+            actual == declared
+          end.each do |(actual, declared)|
+            errors << ArgumentMismatchError.new(actual, declared)
+          end
         end
+      end
+      expr.check_types(errors)
+      arg_list.each do |arg|
+        arg.check_types(errors)
       end
     end
   end

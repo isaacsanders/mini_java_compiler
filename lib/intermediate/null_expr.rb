@@ -12,5 +12,9 @@ module Intermediate
     def check_types(errors)
 
     end
+
+    def input_text
+      null_rw.input_text
+    end
   end
 end

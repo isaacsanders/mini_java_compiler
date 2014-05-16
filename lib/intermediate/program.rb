@@ -30,12 +30,8 @@ module Intermediate
       @class_list.each_with_index do |klass, index|
         unless klass.opt_extends.nil?
           extends_index = @class_list.map(&:id).index(klass.opt_extends)
-          if extends_index.nil?
-            errors << UninitializedConstantError.new(klass.opt_extends)
-          else
-            if extends_index > index
-              errors << DefineSuperclassFirstError.new(klass.id)
-            end
+          if extends_index.nil? || extends_index > index
+            errors << NoClassError.new(klass.superclass_name)
           end
         end
         klass.check_types(errors)

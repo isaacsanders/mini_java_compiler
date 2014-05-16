@@ -26,9 +26,10 @@ module Intermediate
     end
 
     def check_types(errors)
-      if expr.to_type != int_rw
+      if expr.to_type != int_rw and expr.to_type == :not_declared
         errors << ArgumentMismatchError.new(system_out_println_rw, int_rw)
       end
+      expr.check_types(errors)
     end
   end
 end

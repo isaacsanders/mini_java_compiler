@@ -91,7 +91,6 @@ module Intermediate
     end
 
     def check_types(errors)
-      p op
       type_signature = OPERATOR_TYPES[op]
       if [eq_o, neq_o].include? op
         if lhs.to_type == rhs.to_type
@@ -99,11 +98,11 @@ module Intermediate
           errors << InvalidRightArgument.new(rhs, lhs.to_type, type_signature[:name])
         end
       else
-        unless type_signature[:lhs] == lhs.to_type
-          errors << InvalidLeftArgument.new(lhs, type_signature[:lhs], type_signature[:name])
+        if type_signature[:lhs] != lhs.to_type and lhs.to_type != :not_declared
+          errors << InvalidLeftArgument.new(lhs.to_type, type_signature[:lhs], type_signature[:name])
         end
-        unless type_signature[:rhs] == rhs.to_type
-          errors << InvalidRightArgument.new(rhs, type_signature[:rhs], type_signature[:name])
+        if type_signature[:rhs] != rhs.to_type and rhs.to_type != :not_declared
+          errors << InvalidRightArgument.new(rhs.to_type, type_signature[:rhs], type_signature[:name])
         end
       end
     end

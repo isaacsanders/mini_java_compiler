@@ -11,8 +11,7 @@ module Intermediate
       symbol_table.get_symbol(this_rw).type
     end
 
-    def to_code
-      "(#{to_type(symbol_table).input_text}) this"
+    def check_types(errors)
     end
   end
 end

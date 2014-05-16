@@ -20,7 +20,7 @@ module Intermediate
 
     def check_types(errors)
       unless condition_expr.to_type == boolean_rw
-        errors << UnexpectedTypeError.new(condition_expr, boolean_rw)
+        errors << NonbooleanWhileConditionError.new(condition_expr.to_type)
       end
 
       statement.check_types(errors)

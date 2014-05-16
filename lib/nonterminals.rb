@@ -29,7 +29,7 @@ class MainClassDecl < Nonterminal
 
   def to_ir
     field_list = []
-    method_list = [Intermediate::Method.new(main_rw, [Intermediate::Formal.new('String[]', @arg_id)], void_rw, @stmt_list.to_ir, nil)]
+    method_list = [Intermediate::Method.new(main_rw, [Intermediate::Formal.new(Lexer::Token.new('String[]'), @arg_id)], void_rw, @stmt_list.to_ir, nil)]
     opt_extends = nil
     Intermediate::Class.new(@id, method_list, field_list, opt_extends)
   end

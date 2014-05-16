@@ -18,9 +18,5 @@ module Intermediate
     def check_types(errors)
 
     end
-
-    def to_code
-      value.input_text
-    end
   end
 end

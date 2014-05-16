@@ -1,8 +1,5 @@
 class Lexer
   class Token < Struct.new(:input_text)
-    def to_code
-      input_text
-    end
   end
 
   class ID < Class.new(Token)
