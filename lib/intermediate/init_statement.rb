@@ -1,9 +1,11 @@
 require_relative '../symbol_table'
+require_relative '../terminals'
 require_relative 'statement'
 require_relative 'errors'
 
 module Intermediate
   class InitStatement < Statement
+    include Terminals
     attr_reader :type, :expr, :id, :symbol_table
 
     def initialize(type, id, expr)
@@ -20,11 +22,29 @@ module Intermediate
       id.input_text
     end
 
+    def to_type
+      if [int_rw, boolean_rw].include? type
+        type
+      else
+        symbol = symbol_table.get_class(type)
+        if symbol.nil?
+          :not_declared
+        else
+          symbol.id.last
+        end
+      end
+    end
+
     def check_types(errors)
       actual = expr.to_type
 
       if type != actual and actual != :not_declared
         errors << InvalidAssignmentError.new(name, actual, type)
+      end
+
+
+      if to_type == :not_declared
+        errors << NoClassError.new(type.input_text)
       end
 
       expr.check_types(errors)

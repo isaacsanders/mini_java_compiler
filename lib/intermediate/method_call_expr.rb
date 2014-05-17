@@ -47,7 +47,7 @@ module Intermediate
         if method.nil?
           errors << Intermediate::NoMethodError.new(method_name, expr.to_type)
         else
-          arg_list.map(&:to_type).zip(method.arg_list.map(&:type)).select do |(actual, declared)|
+          arg_list.map(&:to_type).zip(method.arg_list.map(&:type)).reject do |(actual, declared)|
             actual == declared
           end.each do |(actual, declared)|
             errors << ArgumentMismatchError.new(actual, declared)

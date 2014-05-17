@@ -139,6 +139,16 @@ module Intermediate
           end
         end
 
+        @field_list.each do |field|
+          if [int_rw, boolean_rw].include? field.type
+          else
+            symbol = symbol_table.get_class(field.type)
+            if symbol.nil?
+              errors << NoClassError.new(field.type.input_text)
+            end
+          end
+        end
+
         @method_list.each do |method|
           method.check_types(errors)
         end

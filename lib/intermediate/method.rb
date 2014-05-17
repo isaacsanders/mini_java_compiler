@@ -72,6 +72,19 @@ module Intermediate
         end
       end
 
+      if id == main_rw
+      else
+        arg_list.each do |arg|
+          if [int_rw, boolean_rw].include? arg.type
+          else
+            symbol = symbol_table.get_class(arg.type)
+            if symbol.nil?
+              errors << NoClassError.new(arg.type.input_text)
+            end
+          end
+        end
+      end
+
       procedure.check_types(errors)
     end
   end
