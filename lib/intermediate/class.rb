@@ -69,17 +69,17 @@ module Intermediate
     end
 
     def to_mips
-      data = Hash.new
-      offset = 0
+      stack_frame = StackFrame.new
       field_list.each do |field|
-        data[field.to_mips_value] = offset
-        offset += field.size
+        stack_frame.add_field(field.id)
       end
-      {
-        data: {
+      method_list.map {|m| m.to_mips(stack_frame.dup) }
+    end
 
-        }
-      }
+    def byte_size
+      field_list.reduce(0) do |size, field|
+        size + field.byte_size
+      end
     end
 
     def name

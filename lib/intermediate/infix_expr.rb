@@ -90,6 +90,86 @@ module Intermediate
       rhs.init_st(symbol_table)
     end
 
+    def to_mips(stack_frame)
+      lhs.to_mips(stack_frame) +
+        [ "subi $sp, 4",
+          "sw $t0, 0($sp)" ] +
+          rhs.to_mips(stack_frame) +
+          [ "or $t1, $t0, $t0",
+            "lw $t0, 0($sp)",
+            "addi $sp, 4" ] +
+            instruction_specific_mips(stack_frame)
+    end
+
+    def instruction_specific_mips(stack_frame)
+      case op
+      when add_o
+        [
+          "add $t0, $t0, $t1"
+        ]
+      when sub_o
+        [
+          "sub $t0, $t0, $t1"
+        ]
+      when mult_o
+        [
+          "mult $t0, $t1",
+          "mflo $t0"
+        ]
+      when div_o
+        [
+          "div $t0, $t1",
+          "mflo $t0"
+        ]
+      when lt_o
+        [
+          "slt $t0, $t0, $t1"
+        ]
+      when lte_o
+        [
+          "slt $t3, $t0, $t1",
+          "or $t2, $zero, $zero",
+          "bne $t0, $t1, 2",
+          "addi $t2, $t2, 1",
+          "or $t0, $t2, $t3"
+        ]
+      when gt_o
+        [
+          "slt $t3, $t1, $t0",
+          "or $t2, $zero, $zero",
+          "beq $t0, $t1, 2",
+          "addi $t2, $t2, 1",
+          "and $t0, $t2, $t3"
+        ]
+      when gte_o
+        [
+          "slt $t0, $t1, $t0"
+        ]
+      when and_o
+        [
+          "and $t0, $t0, $t1"
+        ]
+      when or_o
+        [
+          "or $t0, $t0, $t1"
+        ]
+      when eq_o
+        [
+          "or $t2, $zero, $zero",
+          "beq $t0, $t1, 2",
+          "addi $t2, $t2, 1",
+          "or $t0, $t2, $zero"
+        ]
+      when neq_o
+        [
+          "or $t2, $zero, $zero",
+          "bnq $t0, $t1, 2",
+          "addi $t2, $t2, 1",
+          "or $t0, $t2, $zero"
+        ]
+      end
+    end
+
     def check_types(errors)
       type_signature = OPERATOR_TYPES[op]
       if [eq_o, neq_o].include? op

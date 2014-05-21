@@ -1,7 +1,7 @@
-require 'test/unit'
+require 'minitest/autorun'
 require_relative '../lib/simple_lexer'
 
-class Test::Unit::TestCase
+class TestSimpleLexer < MiniTest::Test
   def setup
     @lexer = SimpleLexer.new
   end

@@ -1,3 +1,5 @@
+require_relative "../stack_frame"
+
 module Intermediate
   class Procedure
     attr_reader :statement_list
@@ -21,10 +23,10 @@ module Intermediate
       end
     end
 
-    def to_mips
-      statement_list.map do |stmt|
-        stmt.to_mips
-      end.join("\n")
+    def to_mips(stack_frame)
+      statement_list.reduce([]) do |insts, stmt|
+        insts + stmt.to_mips(stack_frame)
+      end
     end
 
     def check_types(errors)

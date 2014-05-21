@@ -93,6 +93,7 @@ class Parser
       end
       focus = stack.last
     end
+    self
   end
 
   def terminal?(token)

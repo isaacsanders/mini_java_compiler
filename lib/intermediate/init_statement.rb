@@ -22,6 +22,20 @@ module Intermediate
       id.input_text
     end
 
+    def to_mips(stack_frame)
+      mips_evaluate(stack_frame) + mips_assign(stack_frame)
+    end
+
+    def mips_evaluate(stack_frame)
+      expr.to_mips(stack_frame)
+    end
+
+    def mips_assign(stack_frame)
+      [
+        "ori #{stack_frame.set_next_register(id)}, $t0, $zero"
+      ]
+    end
+
     def to_type
       if [int_rw, boolean_rw].include? type
         type

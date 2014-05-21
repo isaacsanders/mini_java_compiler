@@ -26,6 +26,31 @@ module Intermediate
       end
     end
 
+    def to_mips(stack_frame)
+      if stack_frame.has_register_for?(id)
+        saved_register = stack_frame.get_register(id)
+        [
+          "or $t0, #{saved_register}, $zero"
+        ]
+      else
+        if stack_frame.has_frame_offset_for?(id)
+          frame_offset = stack_frame.frame_offset(id)
+          [
+            "lw $t0, #{frame_offset}($fp)"
+          ]
+        else
+          if stack_frame.has_field_offset_for?(id)
+            field_offset = stack_frame.field_offset(id)
+            [
+              "lw $t0, #{field_offset}($a0)"
+            ]
+          else
+            raise "Massive Problem"
+          end
+        end
+      end
+    end
+
     def check_types(errors)
       errors
     end

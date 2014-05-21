@@ -18,6 +18,30 @@ module Intermediate
       statement.init_st(symbol_table)
     end
 
+    def to_mips(stack_frame)
+      intrs = [
+        "#{loop_start}:"
+      ] +
+      condition_expr.to_mips(stack_frame) + [
+        "bne $zero, $t0, #{loop_end}"
+      ] +
+      statement.to_mips(stack_frame) + [
+        "j #{loop_start}",
+        "#{loop_end}:",
+        "noop"
+      ]
+      $loop_counter += 1
+      intrs
+    end
+
+    def loop_start
+      "loop#{$loop_counter}"
+    end
+
+    def loop_end
+      "exit#{$loop_counter}"
+    end
+
     def check_types(errors)
       unless condition_expr.to_type == boolean_rw
         errors << NonbooleanWhileConditionError.new(condition_expr.to_type)

@@ -35,6 +35,33 @@ module Intermediate
       id.input_text
     end
 
+    def to_mips(stack_frame)
+      if stack_frame.has_register_for?(id)
+        saved_register = stack_frame.get_register(id)
+        assignment = [
+          "or #{saved_register}, $t0, $zero"
+        ]
+      else
+        if stack_frame.has_frame_offset_for?(id)
+          frame_offset = stack_frame.frame_offset(id)
+          assignment = [
+            "sw $t0, #{frame_offset}($fp)"
+          ]
+        else
+          if stack_frame.has_field_offset_for?(id)
+            field_offset = stack_frame.field_offset(id)
+            assignment = [
+              "sw $t0, #{field_offset}($a0)"
+            ]
+          else
+            raise "Massive Problem"
+          end
+        end
+      end
+
+      value_expr.to_mips(stack_frame) + assignment
+    end
+
     def check_types(errors)
       symbol = symbol_table.get_symbol(id)
       if symbol.nil?

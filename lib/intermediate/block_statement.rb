@@ -13,6 +13,10 @@ module Intermediate
       procedure.init_st(parent)
     end
 
+    def to_mips(stack_frame)
+      procedure.to_mips(stack_frame)
+    end
+
     def check_types(errors)
       procedure.check_types(errors)
     end

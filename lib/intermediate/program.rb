@@ -28,8 +28,9 @@ module Intermediate
     end
 
     def to_mips
-      "main:\n" +
-      @main_class.method_list.map(&:to_mips).join("\n")
+      $loop_counter = 0
+      @class_list.map(&:to_mips).join("\n") +
+        @main_class.method_list.map {|m| m.to_mips(StackFrame.new) }.join("\n")
     end
 
     def check_types

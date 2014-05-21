@@ -41,6 +41,31 @@ module Intermediate
       method_id.input_text
     end
 
+    def method_label
+      "#{caller_class.name}_#{method_name}"
+    end
+
+    def to_mips(stack_frame)
+      word_count = arg_list.count + 1
+      [
+        "subi $sp, $sp, #{4 * (1 + word_count)}",
+        "sw $fp, #{4 * word_count}($sp)",
+      ] + arg_list.each_with_index.reduce([]) do |acc, (arg, i)|
+          arg.to_mips(stack_frame) + [
+            "sw $t0, #{4 * (i + 2)}($sp)"
+          ] + acc
+        end +
+        [
+          "sw $ra, 0($sp)",
+          "or $fp, $sp, $zero", # establish frame pointer
+          "jal #{method_label}",
+          "or $t0, $v0, $zero",
+          "lw $ra, 0($fp)",
+          "addi $sp, $sp, #{4 * (1 + word_count)}",
+          "lw $fp, -4($fp)",
+        ]
+    end
+
     def check_types(errors)
       if caller_class != :not_declared
         method = caller_class.method_list.detect {|m| m.id == method_id }

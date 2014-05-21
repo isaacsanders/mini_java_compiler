@@ -2,10 +2,14 @@ require_relative 'errors'
 
 module Intermediate
   class Formal
-    attr_reader :name, :type
+    attr_reader :id, :type
 
-    def initialize(type, name)
-      @type, @name = type, name
+    def initialize(type, id)
+      @type, @id = type, id
+    end
+
+    def name
+      id.input_text
     end
   end
 end

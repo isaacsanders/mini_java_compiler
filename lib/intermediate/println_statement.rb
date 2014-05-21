@@ -17,12 +17,12 @@ module Intermediate
       @expr.init_st(@symbol_table)
     end
 
-    def to_mips
-      [
+    def to_mips(stack_frame)
+      expr.to_mips(stack_frame) + [
         "li $v0, 1",
-        "li $a0, #{expr.to_mips_value}",
+        "or $a0, $t0, $zero",
         "syscall"
-      ].join("\n")
+      ]
     end
 
     def check_types(errors)

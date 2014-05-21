@@ -25,7 +25,7 @@ module Intermediate
       parent.add_symbol(return_type, id)
       @symbol_table = SymbolTable.new(parent)
       arg_list.each do |formal|
-        symbol_table.add_symbol(formal.type, formal.name)
+        symbol_table.add_symbol(formal.type, formal.id)
       end
       procedure.init_st(symbol_table)
       if id != main_rw
@@ -33,17 +33,30 @@ module Intermediate
       end
     end
 
-    def to_mips
+    def to_mips(stack_frame)
       if main_rw == id
-        {
-          data: {},
-          text: {
-            main: [procedure.to_mips] + ["jr $ra"]
-          }
-        }
+        procedure.to_mips(stack_frame) +
+          ["jr $ra"]
       else
-
+        arg_list.each do |arg|
+          stack_frame.add_parameter(arg.id)
+        end
+        [
+          "#{label}:",
+        ] + procedure.to_mips(stack_frame) +
+        return_statement.to_mips(stack_frame) +
+        [
+          "jr $ra"
+        ]
       end
+    end
+
+    def label
+      "#{class_name}_#{name}"
+    end
+
+    def class_name
+      symbol_table.get_symbol(this_rw).type.input_text
     end
 
     def name

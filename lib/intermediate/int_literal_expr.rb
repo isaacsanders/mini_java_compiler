@@ -15,8 +15,10 @@ module Intermediate
       int_rw
     end
 
-    def to_mips_value
-      value.input_text.to_i
+    def to_mips(stack_frame)
+      [
+        "li $t0, #{value.input_text.to_i}"
+      ]
     end
 
     def check_types(errors)
