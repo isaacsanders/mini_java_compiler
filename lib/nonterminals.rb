@@ -246,9 +246,27 @@ class Stmt < Nonterminal
     when :while
       Intermediate::WhileStatement.new(@test.to_ir, @body.to_ir)
     when :for
-      #TODO
+      init = @init.to_ir
+      init = if init
+               [init]
+             else
+               []
+             end
+      test = @test.to_ir
+      iter = @iter.to_ir
+      iter = if iter
+               [iter]
+             else
+               []
+             end
+      body = @body.to_ir
+
+      while_body = Intermediate::Procedure.new([body] + iter)
+      while_loop = Intermediate::WhileStatement.new(test, while_body)
+      Intermediate::Procedure.new(init + [while_loop])
     when :until
-      #TODO
+      test = Intermediate::PrefixExpr.new(bang, @test.to_ir)
+      Intermediate::WhileStatement.new(test, @body.to_it)
     end
   end
 end
@@ -293,9 +311,9 @@ class StmtNoSemi < Nonterminal
     when :assign
       @stmt_prime_id.to_ir(@id)
     when :break
-      #TODO
+      Intermediate::BreakStatement.new
     when :continue
-      #TODO
+      Intermediate::ContinueStatement.new
     end
   end
 end
