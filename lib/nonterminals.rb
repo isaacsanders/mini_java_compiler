@@ -268,8 +268,8 @@ class Stmt < Nonterminal
       while_loop = Intermediate::WhileStatement.new(test, while_body, for_mode=true)
       Intermediate::Procedure.new(init + [while_loop])
     when :until
-      test = Intermediate::PrefixExpr.new(bang, @test.to_ir)
-      Intermediate::WhileStatement.new(test, @body.to_it)
+      test = Intermediate::PrefixExpr.new(bang_o, @test.to_ir)
+      Intermediate::WhileStatement.new(test, @body.to_ir)
     end
   end
 end
