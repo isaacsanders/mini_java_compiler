@@ -19,10 +19,10 @@ module Intermediate
     def to_mips(stack_frame)
       size = parent_class.byte_size
       [
-        "li $v0 9",
-        "li $a0 #{size}",
+        "li $v0, 9",
+        "li $a0, #{size}",
         "syscall",
-        "or $t0 $v0 $v0"
+        "or $t0, $v0, $v0"
       ]
     end
 

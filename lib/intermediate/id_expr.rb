@@ -30,7 +30,7 @@ module Intermediate
       if stack_frame.has_register_for?(id)
         saved_register = stack_frame.get_register(id)
         [
-          "or $t0, #{saved_register}, $zero"
+          "or $t0, #{saved_register}, $0"
         ]
       else
         if stack_frame.has_frame_offset_for?(id)

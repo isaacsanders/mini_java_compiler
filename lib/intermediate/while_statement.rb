@@ -23,12 +23,12 @@ module Intermediate
         "#{loop_start}:"
       ] +
       condition_expr.to_mips(stack_frame) + [
-        "bne $zero, $t0, #{loop_end}"
+        "beq $0, $t0, #{loop_end}"
       ] +
       statement.to_mips(stack_frame) + [
         "j #{loop_start}",
         "#{loop_end}:",
-        "noop"
+        "sll $0, $0, 0"
       ]
       $loop_counter += 1
       intrs

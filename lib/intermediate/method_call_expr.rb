@@ -42,27 +42,36 @@ module Intermediate
     end
 
     def method_label
-      "#{caller_class.name}_#{method_name}"
+      klass = caller_class
+      while (klass.superclass.instance_variable_get(:@method_list) || []).map(&:id).include? method_id
+        klass = klass.superclass
+      end
+      "#{klass.name}_#{method_name}"
     end
 
     def to_mips(stack_frame)
-      word_count = arg_list.count + 1
       [
-        "subi $sp, $sp, #{4 * (1 + word_count)}",
-        "sw $fp, #{4 * word_count}($sp)",
+        "addi $sp, $sp, -4",
+        "sw $a0, 0($sp)"
+      ] + expr.to_mips(stack_frame) + [
+        "or $a0, $t0, $0",
+        "addi $sp, $sp, -4",
+        "sw $fp, 0($sp)",
+        "addi $sp, $sp, #{-4 * (arg_list.length + 1)}",
+        "or $fp, $sp, $0" # establish frame pointer
       ] + arg_list.each_with_index.reduce([]) do |acc, (arg, i)|
           arg.to_mips(stack_frame) + [
-            "sw $t0, #{4 * (i + 2)}($sp)"
+            "sw $t0, #{4 * (i + 1)}($fp)"
           ] + acc
         end +
         [
-          "sw $ra, 0($sp)",
-          "or $fp, $sp, $zero", # establish frame pointer
+          "sw $ra, 0($fp)",
           "jal #{method_label}",
-          "or $t0, $v0, $zero",
+          "or $t0, $v0, $0",
           "lw $ra, 0($fp)",
-          "addi $sp, $sp, #{4 * (1 + word_count)}",
-          "lw $fp, -4($fp)",
+          "addi $sp, $sp, #{4 * (arg_list.length + 2)}",
+          "lw $fp, -4($sp)",
+          "or $a0, $t4, $0"
         ]
     end
 

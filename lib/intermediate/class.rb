@@ -18,7 +18,7 @@ module Intermediate
       if opt_extends.nil? or superclass == :class_doesnt_exist
         @field_list
       else
-        @field_list + superclass.field_list
+        superclass.field_list + @field_list
       end
     end
 
@@ -73,13 +73,11 @@ module Intermediate
       field_list.each do |field|
         stack_frame.add_field(field.id)
       end
-      method_list.map {|m| m.to_mips(stack_frame.dup) }
+      @method_list.map {|m| m.to_mips(stack_frame.dup) }
     end
 
     def byte_size
-      field_list.reduce(0) do |size, field|
-        size + field.byte_size
-      end
+      field_list.length * 4
     end
 
     def name

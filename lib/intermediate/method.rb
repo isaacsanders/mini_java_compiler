@@ -36,7 +36,7 @@ module Intermediate
     def to_mips(stack_frame)
       if main_rw == id
         procedure.to_mips(stack_frame) +
-          ["jr $ra"]
+          [ "jr $ra" ]
       else
         arg_list.each do |arg|
           stack_frame.add_parameter(arg.id)
@@ -46,6 +46,7 @@ module Intermediate
         ] + procedure.to_mips(stack_frame) +
         return_statement.to_mips(stack_frame) +
         [
+          "or $v0, $t0, $0",
           "jr $ra"
         ]
       end
@@ -56,7 +57,12 @@ module Intermediate
     end
 
     def class_name
-      symbol_table.get_symbol(this_rw).type.input_text
+      class_id = symbol_table.get_symbol(this_rw).type
+      klass = symbol_table.get_class(class_id).type
+      while (klass.superclass.instance_variable_get(:@method_list) || []).include?(self) do
+        klass = klass.superclass
+      end
+      klass.name
     end
 
     def name
@@ -83,6 +89,8 @@ module Intermediate
         if actual_type == :not_declared
           errors << NoClassError.new(return_type.input_text)
         end
+
+        return_statement.check_types(errors)
       end
 
       if id == main_rw

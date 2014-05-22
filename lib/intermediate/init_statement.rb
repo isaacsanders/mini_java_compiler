@@ -32,7 +32,7 @@ module Intermediate
 
     def mips_assign(stack_frame)
       [
-        "ori #{stack_frame.set_next_register(id)}, $t0, $zero"
+        "or #{stack_frame.set_next_register(id)}, $t0, $0"
       ]
     end
 

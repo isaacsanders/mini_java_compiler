@@ -39,7 +39,7 @@ module Intermediate
       if stack_frame.has_register_for?(id)
         saved_register = stack_frame.get_register(id)
         assignment = [
-          "or #{saved_register}, $t0, $zero"
+          "or #{saved_register}, $t0, $0"
         ]
       else
         if stack_frame.has_frame_offset_for?(id)
@@ -64,6 +64,11 @@ module Intermediate
 
     def check_types(errors)
       symbol = symbol_table.get_symbol(id)
+
+      if symbol.nil?
+        symbol = symbol_table.get_field(id)
+      end
+
       if symbol.nil?
         errors << UndeclaredVariableError.new(name)
       else

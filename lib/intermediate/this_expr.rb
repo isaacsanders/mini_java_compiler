@@ -11,6 +11,12 @@ module Intermediate
       symbol_table.get_symbol(this_rw).type
     end
 
+    def to_mips(stack_frame)
+      [
+        "or $t0, $a0, $0"
+      ]
+    end
+
     def check_types(errors)
     end
   end
