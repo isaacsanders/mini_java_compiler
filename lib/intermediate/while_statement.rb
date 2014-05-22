@@ -33,7 +33,7 @@ module Intermediate
         "#{loop_end}:",
         "sll $0, $0, 0"
       ]
-      unless for_mode
+      unless @for_mode
         intrs = ["#{loop_continue}:"] + intrs
       end
       $loop_stack.pop

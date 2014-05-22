@@ -239,6 +239,8 @@ class Stmt < Nonterminal
 
   def to_ir
     case @stmt_type
+    when :stmt_no_semi
+      @stmt_no_semi.to_ir
     when :block
       Intermediate::BlockStatement.new(@stmt_list.to_ir)
     when :ifelse
@@ -321,10 +323,10 @@ end
 
 class StmtPrimeID < Nonterminal
   def fill_slots(table_entry)
-    if table_entry.length == 3
-      _, @expr, _ = table_entry
+    if table_entry.length == 2
+      _, @expr = table_entry
     else
-      @id, _, @expr, _ = table_entry
+      @id, _, @expr = table_entry
     end
   end
 
