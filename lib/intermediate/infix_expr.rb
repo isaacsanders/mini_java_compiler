@@ -92,12 +92,12 @@ module Intermediate
 
     def to_mips(stack_frame)
       lhs.to_mips(stack_frame) +
-        [ "subi $sp, 4",
+        [ "addi $sp, $sp, -4",
           "sw $t0, 0($sp)" ] +
           rhs.to_mips(stack_frame) +
           [ "or $t1, $t0, $t0",
             "lw $t0, 0($sp)",
-            "addi $sp, 4" ] +
+            "addi $sp, $sp, 4" ] +
             instruction_specific_mips(stack_frame)
     end
 
@@ -126,19 +126,23 @@ module Intermediate
           "slt $t0, $t0, $t1"
         ]
       when lte_o
+        $branch_index += 1
         [
           "slt $t3, $t0, $t1",
-          "or $t2, $zero, $zero",
-          "bne $t0, $t1, 2",
+          "or $t2, $0, $0",
+          "bne $t0, $t1, cond#{$branch_index}",
           "addi $t2, $t2, 1",
+          "cond#{$branch_index}:",
           "or $t0, $t2, $t3"
         ]
       when gt_o
+        $branch_index += 1
         [
           "slt $t3, $t1, $t0",
-          "or $t2, $zero, $zero",
-          "beq $t0, $t1, 2",
+          "or $t2, $0, $0",
+          "beq $t0, $t1, cond#{$branch_index}",
           "addi $t2, $t2, 1",
+          "cond#{$branch_index}:",
           "and $t0, $t2, $t3"
         ]
       when gte_o
@@ -154,18 +158,22 @@ module Intermediate
           "or $t0, $t0, $t1"
         ]
       when eq_o
+        $branch_index += 1
         [
-          "or $t2, $zero, $zero",
-          "beq $t0, $t1, 2",
+          "or $t2, $0, $0",
+          "beq $t0, $t1, cond#{$branch_index}",
           "addi $t2, $t2, 1",
-          "or $t0, $t2, $zero"
+          "cond#{$branch_index}:",
+          "or $t0, $t2, $0"
         ]
       when neq_o
+        $branch_index += 1
         [
-          "or $t2, $zero, $zero",
-          "bnq $t0, $t1, 2",
+          "or $t2, $0, $0",
+          "bnq $t0, $t1, cond#{$branch_index}",
           "addi $t2, $t2, 1",
-          "or $t0, $t2, $zero"
+          "cond#{$branch_index}:",
+          "or $t0, $t2, $0"
         ]
       end
     end

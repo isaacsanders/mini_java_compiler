@@ -23,7 +23,7 @@ class TestStackFrame < MiniTest::Test
     stack_frame = StackFrame.new
     stack_frame.set_next_register("id")
     expected = [
-      "subi $sp, 4",
+      "addi $sp, $sp, -4",
       "sw $s0, 0($sp)"
     ].join("\n")
     save_registers = stack_frame.save_registers_mips
@@ -31,7 +31,7 @@ class TestStackFrame < MiniTest::Test
 
     s = StackFrame::SaveRegistersMips.new(3)
     expected = [
-      "subi $sp, 12",
+      "addi $sp, $sp, -12",
       "sw $s0, 0($sp)",
       "sw $s1, 4($sp)",
       "sw $s2, 8($sp)"
@@ -45,7 +45,7 @@ class TestStackFrame < MiniTest::Test
     stack_frame.set_next_register("id")
     expected = [
       "lw $s0, 0($sp)",
-      "addi $sp, 4"
+      "addi $sp, $sp, 4"
     ].join("\n")
     restore_registers = stack_frame.restore_registers_mips
     assert_equal restore_registers.to_s, expected
@@ -55,7 +55,7 @@ class TestStackFrame < MiniTest::Test
       "lw $s0, 0($sp)",
       "lw $s1, 4($sp)",
       "lw $s2, 8($sp)",
-      "addi $sp, 12"
+      "addi $sp, $sp, 12"
     ].join("\n")
 
     assert_equal s.to_s, expected

@@ -20,7 +20,10 @@ module Intermediate
     def to_mips(stack_frame)
       expr.to_mips(stack_frame) + [
         "li $v0, 1",
-        "or $a0, $t0, $zero",
+        "or $a0, $t0, $0",
+        "syscall",
+        "li $v0, 11",
+        "li $a0, 10",
         "syscall"
       ]
     end

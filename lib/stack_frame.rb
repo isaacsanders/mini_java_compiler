@@ -9,7 +9,7 @@ class StackFrame
     end
 
     def to_s
-      ([ "subi $sp, #{register_count * 4}" ] +
+      ([ "addi $sp, $sp, #{register_count * -4}" ] +
        register_count
        .times
        .map {|n| "sw $s#{n}, #{4 * n}($sp)" })
@@ -28,7 +28,7 @@ class StackFrame
       (register_count
        .times
        .map {|n| "lw $s#{n}, #{4 * n}($sp)" } +
-       [ "addi $sp, #{register_count * 4}" ])
+       [ "addi $sp, $sp, #{register_count * 4}" ])
        .join("\n")
     end
   end
@@ -41,7 +41,7 @@ class StackFrame
     @field_index = -1
 
     @frame_offset_table = Hash.new
-    @frame_index = -1
+    @frame_index = 0
     # Other things
     @previous = previous
     @size = symbol_dict.length
