@@ -7,9 +7,10 @@ module Intermediate
 
     attr_reader :condition_expr, :statement
 
-    def initialize(condition_expr, statement)
+    def initialize(condition_expr, statement, for_mode=false)
       @condition_expr = condition_expr # bool type
       @statement = statement
+      @for_mode = for_mode
     end
 
     def init_st(parent)
@@ -32,6 +33,9 @@ module Intermediate
         "#{loop_end}:",
         "noop"
       ]
+      unless for_mode
+        intrs = ["#{loop_continue}:"] + intrs
+      end
       $loop_stack.pop
       intrs
     end
@@ -42,6 +46,10 @@ module Intermediate
 
     def loop_end
       "exit#{$loop_stack.last}"
+    end
+
+    def loop_continue
+      "continue#{$loop_stack.last}"
     end
 
     def check_types(errors)

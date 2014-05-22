@@ -259,10 +259,11 @@ class Stmt < Nonterminal
              else
                []
              end
+      iter = [Intermediate::ContinueLabelHelper.new] + iter
       body = @body.to_ir
 
       while_body = Intermediate::Procedure.new([body] + iter)
-      while_loop = Intermediate::WhileStatement.new(test, while_body)
+      while_loop = Intermediate::WhileStatement.new(test, while_body, for_mode=true)
       Intermediate::Procedure.new(init + [while_loop])
     when :until
       test = Intermediate::PrefixExpr.new(bang, @test.to_ir)
