@@ -19,6 +19,8 @@ module Intermediate
     end
 
     def to_mips(stack_frame)
+      $loop_stack.push $loop_counter
+      $loop_counter += 1
       intrs = [
         "#{loop_start}:"
       ] +
@@ -30,16 +32,16 @@ module Intermediate
         "#{loop_end}:",
         "noop"
       ]
-      $loop_counter += 1
+      $loop_stack.pop
       intrs
     end
 
     def loop_start
-      "loop#{$loop_counter}"
+      "loop#{$loop_stack.last}"
     end
 
     def loop_end
-      "exit#{$loop_counter}"
+      "exit#{$loop_stack.last}"
     end
 
     def check_types(errors)

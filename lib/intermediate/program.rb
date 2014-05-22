@@ -29,6 +29,7 @@ module Intermediate
 
     def to_mips
       $loop_counter = 0
+      $loop_stack = Array.new
       @class_list.map(&:to_mips).join("\n") +
         @main_class.method_list.map {|m| m.to_mips(StackFrame.new) }.join("\n")
     end
