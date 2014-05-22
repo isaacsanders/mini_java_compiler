@@ -216,9 +216,9 @@ end
 class Stmt < Nonterminal
   def fill_slots(table_entry)
     case table_entry.first
-    when TypeNotID
-      @stmt_type = :init
-      @type_not_id, @id, _, @expr, _ = table_entry
+    when StmtNoSemi
+      @stmt_type = :stmt_no_semi
+      @stmt_no_semi, _ = table_entry
     when open_brace_d
       @stmt_type = :block
       _, @stmt_list, _ = table_entry
@@ -228,12 +228,59 @@ class Stmt < Nonterminal
     when while_rw
       @stmt_type = :while
       _, _, @test, _, @body = table_entry
+    when for_rw
+      @stmt_type = :for
+      _, _, @init, _, @test, _, @iter, _, @body = table_entry
+    when until_rw
+      @stmt_type = :until
+      _, _, @test, _, @body = table_entry
+    end
+  end
+
+  def to_ir
+    case @stmt_type
+    when :block
+      Intermediate::BlockStatement.new(@stmt_list.to_ir)
+    when :ifelse
+      Intermediate::IfElseStatement.new(@test.to_ir, @true_case.to_ir, @false_case.to_ir)
+    when :while
+      Intermediate::WhileStatement.new(@test.to_ir, @body.to_ir)
+    when :for
+      #TODO
+    when :until
+      #TODO
+    end
+  end
+end
+
+class OptStmtNoSemi < Nonterminal
+  def fill_slots(table_entry)
+    @stmt_no_semi = table_entry.first
+  end
+
+  def to_ir
+    unless @stmt_no_semi == :epsilon
+      @stmt_no_semi.to_ir
+    end
+  end
+end
+
+class StmtNoSemi < Nonterminal
+  def fill_slots(table_entry)
+    case table_entry.first
+    when TypeNotID
+      @stmt_type = :init
+      @type_not_id, @id, _, @expr, _ = table_entry
     when system_out_println_rw
       @stmt_type = :println
       _, _, @print_expr, _, _ = table_entry
     when Lexer::ID
       @stmt_type = :assign
       @id, @stmt_prime_id = table_entry
+    when break_rw
+      @stmt_type = :break
+    when continue_rw
+      @stmt_type = :continue
     end
   end
 
@@ -241,16 +288,14 @@ class Stmt < Nonterminal
     case @stmt_type
     when :init
       Intermediate::InitStatement.new(@type_not_id.type, @id, @expr.to_ir)
-    when :block
-      Intermediate::BlockStatement.new(@stmt_list.to_ir)
-    when :ifelse
-      Intermediate::IfElseStatement.new(@test.to_ir, @true_case.to_ir, @false_case.to_ir)
-    when :while
-      Intermediate::WhileStatement.new(@test.to_ir, @body.to_ir)
     when :println
       Intermediate::PrintlnStatement.new(@print_expr.to_ir)
     when :assign
       @stmt_prime_id.to_ir(@id)
+    when :break
+      #TODO
+    when :continue
+      #TODO
     end
   end
 end

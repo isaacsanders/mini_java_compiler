@@ -92,16 +92,27 @@ module Grammar
       [:epsilon]
     ],
     Stmt => [
-      [TypeNotID, Lexer::ID, equals_d, Expr, semicolon_d],
+      [StmtNoSemi, semicolon_d],
       [open_brace_d, StmtList, close_brace_d],
       [if_rw, open_paren_d, Expr, close_paren_d, Stmt, else_rw, Stmt],
       [while_rw, open_paren_d, Expr, close_paren_d, Stmt],
-      [system_out_println_rw, open_paren_d, Expr, close_paren_d, semicolon_d],
-      [Lexer::ID, StmtPrimeID]
+      [for_rw, open_paren_d, OptStmtNoSemi, semicolon_d, Expr, semicolon_d, OptStmtNoSemi, close_paren_d, Stmt],
+      [until_rw, open_paren_d, Expr, close_paren_d, Stmt]
+    ],
+    OptStmtNoSemi => [
+      [StmtNoSemi],
+      [:epsilon]
+    ],
+    StmtNoSemi => [
+      [TypeNotID, Lexer::ID, equals_d, Expr],
+      [system_out_println_rw, open_paren_d, Expr, close_paren_d],
+      [Lexer::ID, StmtPrimeID],
+      [break_rw],
+      [continue_rw]
     ],
     StmtPrimeID => [
-      [equals_d, Expr, semicolon_d],
-      [Lexer::ID, equals_d, Expr, semicolon_d]
+      [equals_d, Expr],
+      [Lexer::ID, equals_d, Expr]
     ],
     Expr => [ [Expr7, ExprPrime] ],
     ExprPrime => [ [or_o, Expr7, ExprPrime], [:epsilon] ],

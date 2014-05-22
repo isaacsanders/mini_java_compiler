@@ -24,7 +24,7 @@ class Lexer
 
   def initialize(file)
     @file = file
-    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main'])
+    @reserved_tree = ReservedTree.new(['class','public','static','extends','void','int','boolean','if','else','while','return','return','null','true','false','this','new','String','main','for','until','break','continue'])
   end
 
   def set_reserved_words(list_of_words)
