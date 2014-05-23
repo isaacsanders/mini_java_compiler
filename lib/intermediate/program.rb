@@ -29,6 +29,7 @@ module Intermediate
 
     def to_mips
       $loop_counter = 0
+      $loop_stack = Array.new
       $branch_index = -1
       (@class_list.map(&:to_mips).flatten +
        [ "main:" ] +

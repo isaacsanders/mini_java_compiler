@@ -7,9 +7,10 @@ module Intermediate
 
     attr_reader :condition_expr, :statement
 
-    def initialize(condition_expr, statement)
+    def initialize(condition_expr, statement, for_mode=false)
       @condition_expr = condition_expr # bool type
       @statement = statement
+      @for_mode = for_mode
     end
 
     def init_st(parent)
@@ -19,6 +20,8 @@ module Intermediate
     end
 
     def to_mips(stack_frame)
+      $loop_stack.push $loop_counter
+      $loop_counter += 1
       intrs = [
         "#{loop_start}:"
       ] +
@@ -30,16 +33,23 @@ module Intermediate
         "#{loop_end}:",
         "sll $0, $0, 0"
       ]
-      $loop_counter += 1
+      unless @for_mode
+        intrs = ["#{loop_continue}:"] + intrs
+      end
+      $loop_stack.pop
       intrs
     end
 
     def loop_start
-      "loop#{$loop_counter}"
+      "loop#{$loop_stack.last}"
     end
 
     def loop_end
-      "exit#{$loop_counter}"
+      "exit#{$loop_stack.last}"
+    end
+
+    def loop_continue
+      "continue#{$loop_stack.last}"
     end
 
     def check_types(errors)
