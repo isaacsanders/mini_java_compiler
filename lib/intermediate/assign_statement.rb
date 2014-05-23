@@ -39,19 +39,19 @@ module Intermediate
       if stack_frame.has_register_for?(id)
         saved_register = stack_frame.get_register(id)
         assignment = [
-          "or #{saved_register}, $t0, $0"
+          "or #{saved_register}, $t0, $0 # assign '#{name}'"
         ]
       else
         if stack_frame.has_frame_offset_for?(id)
           frame_offset = stack_frame.frame_offset(id)
           assignment = [
-            "sw $t0, #{frame_offset}($fp)"
+            "sw $t0, #{frame_offset}($fp) # assign '#{name}'"
           ]
         else
           if stack_frame.has_field_offset_for?(id)
             field_offset = stack_frame.field_offset(id)
             assignment = [
-              "sw $t0, #{field_offset}($a0)"
+              "sw $t0, #{field_offset}($a0) # assign '#{name}'"
             ]
           else
             raise "Massive Problem"

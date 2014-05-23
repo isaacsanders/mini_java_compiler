@@ -51,28 +51,28 @@ module Intermediate
 
     def to_mips(stack_frame)
       [
-        "addi $sp, $sp, -4",
-        "sw $a0, 0($sp)"
-      ] + expr.to_mips(stack_frame) + [
-        "or $a0, $t0, $0",
-        "addi $sp, $sp, -4",
+        "addi $sp, $sp, -4 # #{method_name}: push 'this'",
+        "sw $a0, 0($sp)",
+        "addi $sp, $sp, -4 # #{method_name}: push $fp",
         "sw $fp, 0($sp)",
-        "addi $sp, $sp, #{-4 * (arg_list.length + 1)}",
-        "or $fp, $sp, $0" # establish frame pointer
+        "addi $sp, $sp, #{-4 * (arg_list.length + 1)} # #{method_name}: push args (in reverse) and $ra",
       ] + arg_list.each_with_index.reduce([]) do |acc, (arg, i)|
-          arg.to_mips(stack_frame) + [
-            "sw $t0, #{4 * (i + 1)}($fp)"
-          ] + acc
-        end +
-        [
-          "sw $ra, 0($fp)",
-          "jal #{method_label}",
-          "or $t0, $v0, $0",
-          "lw $ra, 0($fp)",
-          "addi $sp, $sp, #{4 * (arg_list.length + 2)}",
-          "lw $fp, -4($sp)",
-          "or $a0, $t4, $0"
-        ]
+        arg.to_mips(stack_frame) +
+        [ "sw $t0, #{4 * (i + 1)}($sp) # #{method_name}: push arg#{i + 1}" ] +
+        acc
+      end + expr.to_mips(stack_frame) + [
+        "or $a0, $t0, $0",
+        "sw $ra, 0($sp)",
+        "or $fp, $sp, $0", # establish frame pointer
+        "jal #{method_label}",
+        "or $t0, $v0, $0",
+        "lw $ra, 0($sp)",
+        "addi $sp, $sp, #{4 * (arg_list.length + 1)} # #{method_name}: pop args and $ra",
+        "lw $fp, 0($sp)",
+        "addi $sp, $sp, 4 # #{method_name}: pop $fp",
+        "lw $a0, 0($sp)",
+        "addi $sp, $sp, 4 # #{method_name}: pop 'this'"
+      ]
     end
 
     def check_types(errors)

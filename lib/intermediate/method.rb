@@ -47,7 +47,7 @@ module Intermediate
         return_statement.to_mips(stack_frame) +
         [
           "or $v0, $t0, $0",
-          "jr $ra"
+          "jr $ra # return from #{label}"
         ]
       end
     end

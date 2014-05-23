@@ -13,7 +13,7 @@ module Intermediate
 
     def to_mips(stack_frame)
       [
-        "or $t0, $a0, $0"
+        "or $t0, $a0, $0 # 'this' ready to be used"
       ]
     end
 

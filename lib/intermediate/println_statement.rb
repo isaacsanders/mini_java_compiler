@@ -19,12 +19,16 @@ module Intermediate
 
     def to_mips(stack_frame)
       expr.to_mips(stack_frame) + [
+        "addi $sp, $sp, -4",
+        "sw $a0, 0($sp)",
         "li $v0, 1",
         "or $a0, $t0, $0",
         "syscall",
         "li $v0, 11",
         "li $a0, 10",
-        "syscall"
+        "syscall",
+        "lw $a0, 0($sp)",
+        "addi $sp, $sp, 4"
       ]
     end
 
