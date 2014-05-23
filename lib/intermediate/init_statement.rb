@@ -22,6 +22,14 @@ module Intermediate
       id.input_text
     end
 
+    def declared_class
+      symbol_table.get_class(type).type
+    end
+
+    def actual_class
+      symbol_table.get_class(expr.to_type).type
+    end
+
     def to_mips(stack_frame)
       mips_evaluate(stack_frame) + mips_assign(stack_frame)
     end
@@ -53,7 +61,17 @@ module Intermediate
       actual = expr.to_type
 
       if type != actual and actual != :not_declared
-        errors << InvalidAssignmentError.new(name, actual, type)
+        klass = actual_class
+        klasses = [klass.id]
+        until klass.superclass == :none
+          klass = klass.superclass
+          klasses << klass.id
+        end
+
+        if klasses.include? type || actual == null_rw
+        else
+          errors << InvalidAssignmentError.new(name, actual, type)
+        end
       end
 
 

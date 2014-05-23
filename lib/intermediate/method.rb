@@ -83,7 +83,17 @@ module Intermediate
       else
         actual_type = return_statement.to_type
         if return_type != actual_type and actual_type != :not_declared
-          errors << MethodReturnTypeMismatchError.new(name, return_type, actual_type)
+          klass = symbol_table.get_class(actual_type).type
+          klasses = [klass.id]
+          until klass.superclass == :none
+            klass = klass.superclass
+            klasses << klass.id
+          end
+
+          if klasses.include? return_type || actual == null_rw
+          else
+            errors << MethodReturnTypeMismatchError.new(name, return_type, actual_type)
+          end
         end
 
         if actual_type == :not_declared

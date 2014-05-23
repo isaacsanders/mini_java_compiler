@@ -12,7 +12,7 @@ class StackFrame
       ([ "addi $sp, $sp, #{register_count * -4}" ] +
        register_count
        .times
-       .map {|n| "sw $s#{n}, #{4 * n}($sp)" })
+       .map {|n| n > 7 ? "sw $t#{n - 7 + 2}, #{4 * n}($sp)" : "sw $s#{n}, #{4 * n}($sp)" })
        .join("\n")
     end
   end
@@ -27,7 +27,7 @@ class StackFrame
     def to_s
       (register_count
        .times
-       .map {|n| "lw $s#{n}, #{4 * n}($sp)" } +
+       .map {|n| n > 7 ? "lw $t#{n - 7 + 2}, #{4 * n}($sp)" : "lw $s#{n}, #{4 * n}($sp)" } +
        [ "addi $sp, $sp, #{register_count * 4}" ])
        .join("\n")
     end
@@ -59,7 +59,11 @@ class StackFrame
   end
 
   def saved_register_from(register_index)
-    "$s#{register_index}"
+    if register_index > 7
+      "$t#{register_index - 7 + 2}"
+    else
+      "$s#{register_index}"
+    end
   end
 
   def has_register_for?(id)

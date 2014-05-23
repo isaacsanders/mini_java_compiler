@@ -15,6 +15,20 @@ module Intermediate
       boolean_rw
     end
 
+    def mips_value
+      if value == true_rw
+        1
+      else
+        0
+      end
+    end
+
+    def to_mips(stack_frame)
+      [
+        "li $t0, #{mips_value}"
+      ]
+    end
+
     def check_types(errors)
 
     end

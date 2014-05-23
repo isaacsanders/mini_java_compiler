@@ -91,17 +91,37 @@ module Intermediate
     end
 
     def to_mips(stack_frame)
-      lhs.to_mips(stack_frame) +
-        [ "addi $sp, $sp, -4",
-          "sw $t0, 0($sp)" ] +
-          rhs.to_mips(stack_frame) +
-          [ "or $t1, $t0, $t0",
-            "lw $t0, 0($sp)",
-            "addi $sp, $sp, 4" ] +
-            instruction_specific_mips(stack_frame)
+      if op == or_o
+        $branch_index += 1
+        branch_label = "cond#{$branch_index}"
+
+        lhs.to_mips(stack_frame) +
+          [ "bne $t0, $0, #{branch_label}" ] +
+        rhs.to_mips(stack_frame) +
+        [ "#{branch_label}:",
+          "sll $0, $0, 0"]
+      elsif op == and_o
+        $branch_index += 1
+        branch_label = "cond#{$branch_index}"
+
+        lhs.to_mips(stack_frame) +
+          [ "beq $t0, $0, #{branch_label}" ] +
+        rhs.to_mips(stack_frame) +
+        [ "#{branch_label}:",
+          "sll $0, $0, 0"]
+      else
+        lhs.to_mips(stack_frame) +
+          [ "addi $sp, $sp, -4 # store previous $t0",
+            "sw $t0, 0($sp)" ] +
+            rhs.to_mips(stack_frame) +
+            [ "or $t1, $t0, $t0",
+              "lw $t0, 0($sp)",
+              "addi $sp, $sp, 4 # restore previous $t0" ] +
+              integer_operation_specific_instructions
+      end
     end
 
-    def instruction_specific_mips(stack_frame)
+    def integer_operation_specific_instructions
       case op
       when add_o
         [
@@ -126,28 +146,24 @@ module Intermediate
           "slt $t0, $t0, $t1"
         ]
       when lte_o
-        $branch_index += 1
         [
-          "slt $t3, $t0, $t1",
-          "or $t2, $0, $0",
-          "bne $t0, $t1, cond#{$branch_index}",
-          "addi $t2, $t2, 1",
-          "cond#{$branch_index}:",
-          "or $t0, $t2, $t3"
+          "slt $t0, $t1, $t0",
+          "nor $t0, $t0, $t0",
+          "lui $t1, 0x0000",
+          "ori $t1, $t1, 0x0001",
+          "and $t0, $t0, $t1"
         ]
       when gt_o
-        $branch_index += 1
         [
-          "slt $t3, $t1, $t0",
-          "or $t2, $0, $0",
-          "beq $t0, $t1, cond#{$branch_index}",
-          "addi $t2, $t2, 1",
-          "cond#{$branch_index}:",
-          "and $t0, $t2, $t3"
+          "slt $t0, $t1, $t0"
         ]
       when gte_o
         [
-          "slt $t0, $t1, $t0"
+          "slt $t0, $t0, $t1",
+          "nor $t0, $t0, $t0",
+          "lui $t1, 0x0000",
+          "ori $t1, $t1, 0x0001",
+          "and $t0, $t0, $t1"
         ]
       when and_o
         [
@@ -158,22 +174,19 @@ module Intermediate
           "or $t0, $t0, $t1"
         ]
       when eq_o
-        $branch_index += 1
         [
-          "or $t2, $0, $0",
-          "beq $t0, $t1, cond#{$branch_index}",
-          "addi $t2, $t2, 1",
-          "cond#{$branch_index}:",
-          "or $t0, $t2, $0"
+          "slt $t2, $t0, $t1",
+          "slt $t1, $t1, $t0",
+          "nor $t0, $t2, $t1",
+          "lui $t1, 0x0000",
+          "ori $t1, $t1, 0x0001",
+          "and $t0, $t0, $t1"
         ]
       when neq_o
-        $branch_index += 1
         [
-          "or $t2, $0, $0",
-          "bnq $t0, $t1, cond#{$branch_index}",
-          "addi $t2, $t2, 1",
-          "cond#{$branch_index}:",
-          "or $t0, $t2, $0"
+          "slt $t2, $t0, $t1",
+          "slt $t1, $t1, $t0",
+          "or $t0, $t2, $t1"
         ]
       end
     end
@@ -181,7 +194,7 @@ module Intermediate
     def check_types(errors)
       type_signature = OPERATOR_TYPES[op]
       if [eq_o, neq_o].include? op
-        if lhs.to_type == rhs.to_type
+        if [null_rw, lhs.to_type].include? rhs.to_type or [null_rw, rhs.to_type].include? lhs.to_type
         else
           errors << InvalidRightArgument.new(rhs, lhs.to_type, type_signature[:name])
         end

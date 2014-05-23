@@ -1,8 +1,10 @@
+require_relative '../terminals'
 require_relative 'expression'
 require_relative 'errors'
 
 module Intermediate
   class MethodCallExpr < Expression
+    include Terminals
     attr_reader :expr, :method_id, :arg_list
 
     def initialize(expr, method_id, arg_list)
@@ -43,8 +45,11 @@ module Intermediate
 
     def method_label
       klass = caller_class
-      while (klass.superclass.instance_variable_get(:@method_list) || []).map(&:id).include? method_id
-        klass = klass.superclass
+      if klass.instance_variable_get(:@method_list).map(&:id).include? method_id
+      else
+        while (klass.superclass.instance_variable_get(:@method_list) || []).map(&:id).include? method_id
+          klass = klass.superclass
+        end
       end
       "#{klass.name}_#{method_name}"
     end
@@ -82,7 +87,18 @@ module Intermediate
           errors << Intermediate::NoMethodError.new(method_name, expr.to_type)
         else
           arg_list.map(&:to_type).zip(method.arg_list.map(&:type)).reject do |(actual, declared)|
-            actual == declared
+            if [int_rw, boolean_rw].include? declared
+              actual == declared
+            else
+              klass = symbol_table.get_class(actual).type
+              klasses = [klass.id]
+              while klass.superclass != :none
+                klass = klass.superclass
+                klasses << klass.id
+              end
+
+              klasses.include? declared
+            end
           end.each do |(actual, declared)|
             errors << ArgumentMismatchError.new(actual, declared)
           end

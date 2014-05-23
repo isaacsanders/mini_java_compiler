@@ -74,8 +74,12 @@ module Intermediate
       else
         declared = to_type
         actual = value_expr.to_type
+
         if actual != declared and actual != :not_declared
-          errors << InvalidAssignmentError.new(name, actual, declared)
+          if actual == null_rw
+          else
+            errors << InvalidAssignmentError.new(name, actual, declared)
+          end
         end
         value_expr.check_types(errors)
       end

@@ -13,6 +13,12 @@ module Intermediate
 
     end
 
+    def to_mips(stack_frame)
+      [
+        "or $t0, $0, $0"
+      ]
+    end
+
     def input_text
       null_rw.input_text
     end

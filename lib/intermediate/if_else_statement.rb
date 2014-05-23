@@ -13,6 +13,20 @@ module Intermediate
       @false_statement = false_statement
     end
 
+    def to_mips(stack_frame)
+      $branch_index += 1
+      exit_label = "cond_exit#{$branch_index}"
+      else_label = "cond_else#{$branch_index}"
+      condition_expr.to_mips(stack_frame) +
+        [ "beq $t0, $0, #{else_label}" ] +
+      true_statement.to_mips(stack_frame) +
+      [ "j #{exit_label}",
+        "#{else_label}:" ] +
+        false_statement.to_mips(stack_frame) +
+        [ "#{exit_label}:",
+          "sll $0, $0, 0" ]
+    end
+
     def init_st(parent)
       super
       condition_expr.init_st(symbol_table)
