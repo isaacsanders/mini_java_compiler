@@ -6,6 +6,7 @@ module Terminals
     extends void int boolean
     if else while return null true
     false this new main
+    for until break continue
   }.each do |word|
     define_method("#{word}_rw") do
       Lexer::ReservedWord.new(word)

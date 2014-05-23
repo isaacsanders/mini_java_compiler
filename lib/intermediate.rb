@@ -18,6 +18,7 @@ require_relative "intermediate/init_expr"
 require_relative "intermediate/this_expr"
 require_relative "intermediate/int_literal_expr"
 require_relative "intermediate/boolean_literal_expr"
+require_relative "intermediate/continue_label_helper"
 
 module Intermediate
 end
